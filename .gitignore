@@ -1,3 +1,21 @@
+# Project-specific Saves (Local session saves)
+*.breakdown
+save_data/
+
+# Exports (Don't push your test exports to GitHub)
+*.sex
+*.csv
+*.xlsx
+*.pdf
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Ollama / AI models (Just in case you download them into the project dir)
+models/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
