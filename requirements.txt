@@ -1,0 +1,7 @@
+PySide6          # UI Framework
+ollama           # Talk to local LLM models
+pydantic         # Data validation
+pdfplumber       # Extracting text from PDFs
+python-docx      # Parsing Word (.docx) files
+pandas           # Excel/CSV exports
+openpyxl         # Write Excel files
