@@ -1,13 +1,13 @@
 """
 Global Configuration and User Settings.
 
-This module stores the default settings for the application. 
-At runtime, the UI will modify an instance of ProjectConfig 
-based on user selections.
+This module defines the ProjectConfig dataclass which stores user-adjustable 
+parameters for LLM interaction, extraction depth, performance modes, and 
+Movie Magic Scheduling category defaults.
 """
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 @dataclass
 class ProjectConfig:
@@ -16,17 +16,27 @@ class ProjectConfig:
     """
     # LLM Settings
     ollama_model: str = "llama3.2:3b"
-    temperature: float = 0.1  # Low temperature = more factual, less creative
+    temperature: float = 0.1  # Low temperature ensures factual extraction
     
     # Extraction Logic
     conservative_mode: bool = True
-    extract_implied_elements: bool = False  # Linked to conservative_mode logic
+    extract_implied_elements: bool = False  # Determines if AI infers non-stated items
+    
+    # Performance Settings
+    # Eco Mode: 1 worker thread. Power Mode: >1 worker threads.
+    worker_threads: int = 1 
+    
+    # Range Selection Settings
+    # range_mode options: "All", "Scene", "Page"
+    range_mode: str = "All"
+    range_start: Optional[int] = None
+    range_end: Optional[int] = None
     
     # UI & Workspace
     last_open_directory: str = ""
     auto_save_enabled: bool = True
     
-    # Movie Magic Defaults (The 'Buckets' we discussed)
+    # Movie Magic Defaults
     mms_categories: List[str] = field(default_factory=lambda: [
         "Cast Members", "Background Actors", "Stunts", "Vehicles", "Props",
         "Camera", "Special Effects", "Wardrobe", "Makeup/Hair", "Animals",
@@ -36,5 +46,5 @@ class ProjectConfig:
     ])
 
 # --- APP-WIDE DEFAULTS ---
-# This is the 'Master Template' the app loads on startup.
+# Initialized instance of the config used as the application's base state.
 DEFAULT_CONFIG = ProjectConfig()

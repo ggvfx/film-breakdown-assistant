@@ -19,7 +19,7 @@ MMS_CATEGORIES = [
 ]
 
 class SourceType(str, Enum):
-    """Extensible source tracking for element origin."""
+    """Tracks if an element was literally in the text or logically inferred."""
     EXPLICIT = "explicit"
     IMPLIED = "implied"
     # Future: MANUAL = "manual"
@@ -27,7 +27,7 @@ class SourceType(str, Enum):
 # --- ELEMENT MODELS ---
 
 class Element(BaseModel):
-    """Represents a production item for the MMS 'Library'."""
+    """Represents a single production item (Prop, Cast, etc.)."""
     name: str
     category: str
     source: SourceType = SourceType.EXPLICIT
@@ -37,7 +37,7 @@ class Element(BaseModel):
 # --- REVIEW & SAFETY MODELS ---
 
 class ReviewFlag(BaseModel):
-    """High-priority alerts for the AD's safety review."""
+    """Alerts for the AD (e.g., Stunt detected, high cost item)."""
     flag_type: str
     note: str
     severity: int = Field(ge=1, le=3, default=1)
@@ -45,24 +45,21 @@ class ReviewFlag(BaseModel):
 # --- CORE SCENE MODEL ---
 
 class Scene(BaseModel):
-    """The complete breakdown data for one MMS Sheet."""
-    sheet_number: str
+    """The final structured data for one scene breakdown."""
+    # From Parser
     scene_number: str
     int_ext: str
     set_name: str
     day_night: str
+    scene_index: int
     
-    # Page count split for XML precision
+    # Page Math
+    script_page: str
     pages_whole: int = 0
     pages_eighths: int = 0 
     
-    script_page: str
-    script_day: str
+    # From AI
     synopsis: str = Field(default="", max_length=100)
     description: str = ""
-    
     elements: List[Element] = []
     flags: List[ReviewFlag] = []
-
-    class Config:
-        populate_by_name = True
