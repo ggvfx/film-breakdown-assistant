@@ -1,7 +1,16 @@
-PySide6          # UI Framework
-ollama           # Talk to local LLM models
-pydantic         # Data validation
-pdfplumber       # Extracting text from PDFs
-python-docx      # Parsing Word (.docx) files
-pandas           # Excel/CSV exports
-openpyxl         # Write Excel files
+# --- CORE FRAMEWORK ---
+PySide6          # UI Framework for the desktop interface
+pydantic         # Data models and validation (The "Source of Truth")
+
+# --- AI & LLM ---
+ollama           # Official Python client for local Llama 3.2
+aiohttp          # Required for asynchronous network calls to Ollama
+
+# --- DOCUMENT PARSING ---
+pdfplumber       # High-accuracy PDF text extraction (preserves layout)
+python-docx      # For reading .docx script files
+striprtf         # Essential for cleaning .rtf script files
+
+# --- DATA & EXPORTS ---
+pandas           # Data manipulation for Excel/CSV formatting
+openpyxl         # Engine required by Pandas to write .xlsx files
