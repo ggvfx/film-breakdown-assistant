@@ -6,7 +6,6 @@ save_data/
 *.sex
 *.csv
 *.xlsx
-*.pdf
 
 # OS generated files
 .DS_Store
