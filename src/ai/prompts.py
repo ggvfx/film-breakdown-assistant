@@ -21,7 +21,8 @@ def get_breakdown_prompt(
     page_num: int,
     scene_num: str,
     set_name: str,
-    day_night: str
+    day_night: str,
+    int_ext: str
 ) -> str:
     """
     Constructs the prompt for Llama 3.2. Provides known header info as context.
@@ -32,6 +33,7 @@ def get_breakdown_prompt(
     return f"""
     CONTEXT:
     Current Scene: {scene_num}
+    Type: {int_ext}
     Set: {set_name}
     Time of Day: {day_night}
     Script Page: {page_num}
@@ -46,7 +48,7 @@ def get_breakdown_prompt(
     RULES FOR ELEMENTS:
     - 'name': The name of the item or character.
     - 'count': How many? (e.g., "6", "2", or "1"). Use "1" as default.
-    - 'source': 'explicit' if named, 'implied' if logically required.
+    - 'source': 'explicit' if literally in text, 'implied' if it must exist (e.g. 'Smoke' for a 'Fire').
     - 'confidence': score between 0.0 and 1.0.
 
     OUTPUT FORMAT (JSON):

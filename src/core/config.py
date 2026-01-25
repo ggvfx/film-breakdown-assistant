@@ -45,6 +45,20 @@ class ProjectConfig:
         "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes"
     ])
 
+    # Path Settings
+    output_dir: str = "outputs"
+    test_dir: str = "tests"
+    
+    # Safety & Logistics Triggers (From Master Brief)
+    safety_triggers: dict = field(default_factory=lambda: {
+        "Regulatory": ["Minor", "Child", "8 years old", "Baby"],
+        "Sensitive": ["Intimacy", "Nudity", "Kiss", "Sexual"],
+        "Stunts": ["Fall", "Crash", "Fight", "Explosion", "Fire", "Flame"],
+        "Logistics": ["Car", "Driving", "Rain", "Water", "Animal", "Dog", "Horse"],
+        "Weaponry": ["Gun", "Pistol", "Knife", "Sword", "Rifle"],
+        "Equipment": ["Crane", "Underwater", "Aerial", "Drone"]
+    })
+
 # --- APP-WIDE DEFAULTS ---
 # Initialized instance of the config used as the application's base state.
 DEFAULT_CONFIG = ProjectConfig()
