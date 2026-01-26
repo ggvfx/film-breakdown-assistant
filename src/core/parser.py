@@ -118,6 +118,12 @@ class ScriptParser:
         Surgically extracts INT/EXT, Set, and Time. 
         Supports standard (INT/EXT) and special prefixes (UNDERWATER, I/E).
         """
+        
+        print(f"\n--- DEBUG PARSER ---")
+        print(f"RAW HEADER: '{header}'")
+        # This shows us exactly what the characters are (e.g., if it's a special dash)
+        print(f"CHAR CODES: {[ord(c) for c in header]}")
+
         # Strip alphanumeric scene numbers from start/end (e.g., 1, 47AA, 6b)
         header = re.sub(r'^\s*(\d+[A-Z]*|[A-Z]+\d+)\b', '', header, flags=re.IGNORECASE).strip()
         header = re.sub(r'\b(\d+[A-Z]*|[A-Z]+\d+)\s*$', '', header, flags=re.IGNORECASE).strip()
@@ -139,32 +145,37 @@ class ScriptParser:
         elif first_word in ["UNDERWATER", "SPACE", "VIRTUAL"]:
             current_ie = first_word
             
-        # 2. Split for Set and Time (same as before)
-        parts = header.split('-')
+        # 2. Split by the standard hyphen (Code 45)
+        # We split from the right to ensure the last dash is the Time separator
+        parts = header.rsplit('-', 1)
         current_set = ""
         current_tod = ""
         
         if len(parts) >= 2:
-            current_tod = parts[-1].strip().upper()
-            # Clean the set name from the prefix
-            current_set = parts[0]
-            for pref in standard_prefixes + ["UNDERWATER", "SPACE", "VIRTUAL"]:
-                current_set = current_set.upper().replace(f"{pref}.", "").replace(pref, "").strip()
-        else:
-            current_set = h_up # Mini-slug backup
+            current_set = parts[0].strip()
+            current_tod = parts[1].strip().upper()
             
-        # 3. Memory Inheritance (as discussed)
+            # Clean prefixes (INT, EXT, etc) out of the set name
+            for pref in standard_prefixes + ["UNDERWATER", "SPACE", "VIRTUAL"]:
+                pattern = re.compile(re.escape(pref) + r'\.?\s*', re.IGNORECASE)
+                current_set = pattern.sub('', current_set).strip()
+        else:
+            current_set = header.strip()
+            
+        # 3. Memory Inheritance - Only inherit if we are missing data or see a trigger
         is_lazy = any(word in h_up for word in triggers)
         
-        final_ie = current_ie if current_ie or not is_lazy else self.last_int_ext
-        final_set = current_set if (len(parts) >= 2 and not is_lazy) else (self.last_set_name if is_lazy else current_set)
-        final_tod = self.last_day_night if is_lazy else current_tod
+        # Use new data if present; only inherit if the field is empty OR a trigger is found
+        final_ie = current_ie if current_ie else (self.last_int_ext if is_lazy else "")
+        final_set = current_set if current_set else (self.last_set_name if is_lazy else "")
+        final_tod = current_tod if (current_tod and not is_lazy) else (self.last_day_night if is_lazy else current_tod)
 
         # Update Memory
         self.last_int_ext = final_ie
         self.last_set_name = final_set
         self.last_day_night = final_tod
 
+        print(f"RESULT -> IE: {final_ie}, SET: {final_set}, TOD: {final_tod}")
         return {
             "int_ext": final_ie,
             "set_name": final_set,
