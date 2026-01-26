@@ -118,6 +118,10 @@ class ScriptParser:
         Surgically extracts INT/EXT, Set, and Time. 
         Supports standard (INT/EXT) and special prefixes (UNDERWATER, I/E).
         """
+        # Strip alphanumeric scene numbers from start/end (e.g., 1, 47AA, 6b)
+        header = re.sub(r'^\s*(\d+[A-Z]*|[A-Z]+\d+)\b', '', header, flags=re.IGNORECASE).strip()
+        header = re.sub(r'\b(\d+[A-Z]*|[A-Z]+\d+)\s*$', '', header, flags=re.IGNORECASE).strip()
+        
         h_up = header.upper().strip()
         triggers = ["CONTINUOUS", "LATER", "SAME", "FOLLOWING", "MOMENTS"]
         
