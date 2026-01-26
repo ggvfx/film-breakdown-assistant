@@ -15,15 +15,25 @@ class DataExporter:
         flattened_data = []
         
         for scene in scenes:
-            # 1. Core Header & Narrative Info (Retaining Description)
+            # --- NEW PAGE LOGIC START ---
+            w = scene.get('pages_whole', 0)
+            e = scene.get('pages_eighths', 0)
+            
+            if w > 0:
+                display_pages = f"{w} {e}/8" if e > 0 else f"{w}"
+            else:
+                display_pages = f"{e}/8"
+            # --- NEW PAGE LOGIC END ---
+
+            # 1. Core Header & Narrative Info (Updated "Pages" line)
             row = {
                 "Scene": scene.get("scene_number"),
                 "Int/Ext": scene.get("int_ext"),
                 "Set": scene.get("set_name"),
                 "Day/Night": scene.get("day_night"),
-                "Pages": f"{scene.get('pages_whole', 0)} {scene.get('pages_eighths', 0)}/8",
+                "Pages": display_pages,  # <--- Use the new display_pages variable
                 "Synopsis": scene.get("synopsis"),
-                "Description": scene.get("description"),  # <--- Re-inserted here
+                "Description": scene.get("description"),
             }
 
             # 2. Add MMS Categories with diagnostic info

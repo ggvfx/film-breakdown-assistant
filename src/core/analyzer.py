@@ -78,13 +78,21 @@ class ScriptAnalyzer:
             raw_result = await self.client.generate_breakdown(prompt)
             
             if raw_result:
-                # Merge the Parser's metadata with the AI's extraction
-                # This ensures the final object has EVERYTHING needed for Movie Magic
-                # We overwrite the AI's 'scene_number' with the Parser's 
-                # to ensure 15A stays 15A regardless of AI hallucinations.
+                # 1. Capture the Parser's valid math before the AI merge
+                pages_whole = scene.get("pages_whole", 0)
+                pages_eighths = scene.get("pages_eighths", 0)
+
+                # 2. Existing safety overrides - Fix the AI result before merging
                 raw_result["scene_number"] = scene["scene_number"]
                 raw_result["scene_index"] = scene["scene_index"]
+
+                # 3. Merge AI results into the scene dictionary
                 scene.update(raw_result)
+
+                # 4. Force-restore the Parser's math to prevent AI 'None' overwrites
+                scene["pages_whole"] = pages_whole
+                scene["pages_eighths"] = pages_eighths
+                
                 return scene
             
             return None

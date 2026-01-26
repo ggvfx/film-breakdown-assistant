@@ -102,11 +102,29 @@ class ScriptParser:
             # Clean body text (remove the slugline from the start of the body)
             scene_body = "\n".join(body.split('\n')[1:]).strip()
             
+            # Clean body text
+            scene_body = "\n".join(body.split('\n')[1:]).strip()
+            
+            # Page Math: Estimate 54 lines per page
+            # We use float division to get the true fraction first
+            line_count = len(scene_body.split('\n'))
+            total_eighths = round((line_count / 54) * 8)
+            
+            # Ensure at least 1/8th for very short scenes, but don't force a whole page
+            if total_eighths < 1:
+                total_eighths = 1
+
+            # Separate into whole and eighths for the model
+            pages_whole = total_eighths // 8
+            pages_eighths = total_eighths % 8
+
             scene_chunks.append({
                 "scene_number": self._extract_scene_number(header_line),
                 "int_ext": components["int_ext"],
                 "set_name": components["set_name"],
                 "day_night": components["day_night"],
+                "pages_whole": int(pages_whole),
+                "pages_eighths": int(pages_eighths),
                 "raw_text": scene_body,
                 "scene_index": len(scene_chunks) + 1
             })
@@ -119,10 +137,9 @@ class ScriptParser:
         Supports standard (INT/EXT) and special prefixes (UNDERWATER, I/E).
         """
         
-        print(f"\n--- DEBUG PARSER ---")
-        print(f"RAW HEADER: '{header}'")
-        # This shows us exactly what the characters are (e.g., if it's a special dash)
-        print(f"CHAR CODES: {[ord(c) for c in header]}")
+        #print(f"\n--- DEBUG PARSER ---")
+        #print(f"RAW HEADER: '{header}'")
+        #print(f"CHAR CODES: {[ord(c) for c in header]}")
 
         # Strip alphanumeric scene numbers from start/end (e.g., 1, 47AA, 6b)
         header = re.sub(r'^\s*(\d+[A-Z]*|[A-Z]+\d+)\b', '', header, flags=re.IGNORECASE).strip()
@@ -175,7 +192,8 @@ class ScriptParser:
         self.last_set_name = final_set
         self.last_day_night = final_tod
 
-        print(f"RESULT -> IE: {final_ie}, SET: {final_set}, TOD: {final_tod}")
+        #print(f"RESULT -> IE: {final_ie}, SET: {final_set}, TOD: {final_tod}")
+
         return {
             "int_ext": final_ie,
             "set_name": final_set,
