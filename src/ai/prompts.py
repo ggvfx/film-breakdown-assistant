@@ -18,7 +18,6 @@ You must output ONLY valid, minified JSON. No conversational filler.
 def get_breakdown_prompt(
     scene_text: str, 
     selected_categories: List[str], 
-    page_num: int,
     scene_num: str,
     set_name: str,
     day_night: str,
@@ -36,7 +35,6 @@ def get_breakdown_prompt(
     Type: {int_ext}
     Set: {set_name}
     Time of Day: {day_night}
-    Script Page: {page_num}
 
     TASK:
     1. LENGTH: Estimate the scene length in 8ths of a page (e.g., 4/8, 1 2/8).

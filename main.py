@@ -23,9 +23,9 @@ async def main():
 
     # --- 2. LOAD & PARSE ---
     # Ensure this matches the name of the multi-scene script you generated
-    #script_path = "tests/TheHeistExit-script.pdf"
+    script_path = "tests/TheHeistExit-script.pdf"
     #script_path = "tests/TheBrokenWindow - script.docx" 
-    script_path = "tests/TheDiscovery -script.txt"  
+    #script_path = "tests/TheDiscovery -script.txt"  
     
     if not os.path.exists(script_path):
         logging.error(f"File not found: {script_path}. Please check your 'tests' folder.")

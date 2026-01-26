@@ -54,7 +54,6 @@ class Scene(BaseModel):
     scene_index: int
     
     # Page Math
-    script_page: str
     pages_whole: int = 0
     pages_eighths: int = 0 
     

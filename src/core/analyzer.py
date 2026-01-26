@@ -67,7 +67,6 @@ class ScriptAnalyzer:
             prompt = get_breakdown_prompt(
                 scene_text=scene["raw_text"],
                 selected_categories=categories,
-                page_num=scene.get("page_estimate", 1),
                 scene_num=scene["scene_number"],
                 set_name=scene["set_name"],
                 day_night=scene["day_night"],
