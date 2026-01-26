@@ -15,7 +15,7 @@ class ProjectConfig:
     Stores all user-adjustable settings for the breakdown process.
     """
     # LLM Settings
-    ollama_model: str = "llama3.2:3b"
+    ollama_model: str = "llama3.2"
     temperature: float = 0.1  # Low temperature ensures factual extraction
     
     # Extraction Logic

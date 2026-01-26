@@ -22,7 +22,7 @@ class ScriptParser:
 
     def __init__(self):
         # Patterns to identify the start of a scene (Sluglines)
-        self.slug_regex = r'^(INT\.|EXT\.|I/E\.|INT/EXT\.)'
+        self.slug_regex = r'^\s*(?:\d+\s+)?(?:INT\.|EXT\.|I/E\.|INT/EXT\.)'
         
         # Memory to handle 'CONTINUOUS' or 'LATER' logic
         self.last_set_name = ""

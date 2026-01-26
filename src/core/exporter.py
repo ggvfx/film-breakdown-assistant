@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import List, Dict, Any
-from core.models import MMS_CATEGORIES
+from src.core.models import MMS_CATEGORIES
 
 class DataExporter:
     """
