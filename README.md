@@ -16,7 +16,9 @@ The core logic is currently functional via CLI, utilizing Pydantic for data vali
 ## 🚀 Overview
 The **Film Breakdown Assistant** is a professional-grade utility designed to eliminate the manual "heavy lifting" of the script breakdown process. By automating the extraction of 80%+ of repetitive "grunt work," it empowers Assistant Directors and Production Managers to shift their focus from rote data entry to high-level logistical strategy and creative problem-solving.
 
-The tool follows a **"Human-in-the-Loop"** philosophy: AI performs the initial analysis, while a dedicated **Review & Validation UI** ensures the professional maintains final authority over the data before it enters the production pipeline.
+The tool follows a **"Security-First"** and **"Human-in-the-Loop"** philosophy:
+1. **Local AI:** All processing happens offline via Ollama, ensuring sensitive IP never leaves the local machine.
+2. **Professional Oversight:** AI performs the initial analysis, while a dedicated **Review & Validation UI** ensures the professional maintains final authority over the data before it enters the production pipeline.
 
 ## 🛠️ Key Features
 
