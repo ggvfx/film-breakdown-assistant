@@ -1,16 +1,33 @@
 # Film Breakdown Assistant
 
-A professional, modular Python tool designed for Assistant Directors and film production professionals. This tool leverages local LLMs (via Ollama) to automate the script breakdown process, extracting critical production data for scheduling and logistics.
+**Film Breakdown Assistant** is an intelligent production-scheduling utility designed to eliminate the labor-intensive "grunt work" of manual script analysis. By leveraging Local LLMs, the tool provides a security-first environment for sensitive IP, extracting critical production variables; department elements, stunts, intimacy, and safety requirements—directly into industry-standard formats.
+
+## Project Status
+🚦 **Project Status:** Alpha (Active Development)
+The core logic is currently functional via CLI, utilizing Pydantic for data validation and Pandas for structured output.
+**Current Output:** Automated Excel-based breakdown sheets.
+**Next Milestone:** Implementing .sex (Scheduling Export) support to enable direct, one-click ingestion into Movie Magic Scheduling, eliminating the need for manual data re-entry.
+
+## Strategic Roadmap
+* **Phase 1 (Current):** Refine CLI-based parsing for .fdx and .pdf; optimize Llama 3.2 prompt strategies for "Conservative Extraction" of safety and regulatory flags.
+* **Phase 2 (Immediate):** Develop the .sex export module to bridge the gap between AI extraction and industry-standard scheduling software.
+* **Phase 3 (Q1 2026):** Transition to a PySide6 (Qt) interface for professional session management and local database persistence.
 
 ## 🚀 Overview
-The **Film Breakdown Assistant** parses screenplay files (.fdx, .pdf, .docx) and utilizes AI to identify scene elements, safety concerns, and production requirements. It is designed specifically to bridge the gap between creative scripts and professional scheduling software like **Movie Magic Scheduling**.
+The **Film Breakdown Assistant** is a professional-grade utility designed to eliminate the manual "heavy lifting" of the script breakdown process. By automating the extraction of 80%+ of repetitive "grunt work," it empowers Assistant Directors and Production Managers to shift their focus from rote data entry to high-level logistical strategy and creative problem-solving.
 
-### Key Features
-* **Local AI Processing:** Uses Ollama (Llama 3.2) to ensure script privacy and offline capability.
-* **Conservative Extraction Mode:** Distinguishes between explicit script text and AI-implied production needs.
-* **Safety & Regulatory Flagging:** Automated alerts for Minors, Intimacy, Stunts, Animals, and Weapons.
-* **Industry Standard Export:** Generates `.sex` (Scheduling Export) files for direct import into Movie Magic as well as Excel output.
-* **Session Management:** Save and load breakdown progress to pick up exactly where you left off.
+The tool follows a **"Human-in-the-Loop"** philosophy: AI performs the initial analysis, while a dedicated **Review & Validation UI** ensures the professional maintains final authority over the data before it enters the production pipeline.
+
+## 🛠️ Key Features
+
+* **Intelligence-Driven Script Parsing:** Extracts industry-standard metadata, including slugline parsing (INT/EXT, Location, Time of Day), page count duration in 1/8ths, and automated 6-word scene synopses.
+* **Security-First Local Processing:** Utilizes **Ollama** (Llama 3.2) for 100% offline AI analysis, ensuring sensitive, unreleased intellectual property never leaves the local machine.
+* **Comprehensive Element Extraction:** Leverages LLM analysis to identify and categorize 15+ production departments, from Cast and Background counts to Props, Vehicles, and VFX requirements.
+* **Automated Risk & Safety Flagging:** Scans for high-priority production concerns, including regulatory labor (minors), stunts, intimacy, weaponry, and high-cost logistics (animals/cranes).
+* **Conservative vs. Inference Modes:** Toggleable extraction logic that distinguishes between explicitly stated script elements and AI-implied production needs (e.g., implying "SFX: Smoke" if "Fire" is mentioned).
+* **Hardware-Optimized Workflows:** Features "Eco" and "Power" processing modes to manage local compute resources, enabling smooth operation on production laptops or high-speed multi-threaded analysis.
+* **Industry Standard Interoperability:** Engineered for direct integration into the production ecosystem with planned **.sex (Scheduling Export)** support for **Movie Magic Scheduling** alongside Excel/CSV output.
+* **Session & State Management:** Includes robust "Save/Load" functionality via local JSON checkpoints, allowing production staff to review, edit, and resume breakdowns without data loss.
 
 ## 🛠️ Technical Stack
 * **Language:** Python 3.11+
