@@ -42,5 +42,3 @@ The tool follows a **"Security-First"** and **"Human-in-the-Loop"** philosophy:
 * `src/ai/`: Ollama integration and prompt engineering.
 * `src/ui/`: PySide6 interface components.
 
-## 🚦 Status
-**Planning Phase:** Currently defining core data schemas and skeleton architecture.
