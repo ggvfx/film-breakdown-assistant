@@ -59,6 +59,9 @@ class ProjectConfig:
         "Equipment": ["Crane", "Underwater", "Aerial", "Drone"]
     })
 
+    # Agentic Workflow Settings
+    use_supervisor_agent: bool = False  # Default to False for speed/cost
+
 # --- APP-WIDE DEFAULTS ---
 # Initialized instance of the config used as the application's base state.
 DEFAULT_CONFIG = ProjectConfig()

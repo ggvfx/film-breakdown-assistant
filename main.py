@@ -5,7 +5,8 @@ from src.core.parser import ScriptParser
 from src.core.analyzer import ScriptAnalyzer
 from src.core.exporter import DataExporter
 from src.ai.ollama_client import OllamaClient
-from src.core.config import DEFAULT_CONFIG # Pulling in your dataclass instance
+from src.core.config import DEFAULT_CONFIG
+from src.core.supervisor_agent import SupervisorAgent
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -18,7 +19,8 @@ async def main():
     client = OllamaClient(model_name=DEFAULT_CONFIG.ollama_model) 
     
     # Use the worker_threads from your config (currently 1)
-    analyzer = ScriptAnalyzer(client, concurrency_limit=DEFAULT_CONFIG.worker_threads) 
+    analyzer = ScriptAnalyzer(client, concurrency_limit=DEFAULT_CONFIG.worker_threads)
+    supervisor = SupervisorAgent(client)
     exporter = DataExporter()
 
     # --- 2. LOAD & PARSE ---
@@ -50,6 +52,11 @@ async def main():
         from_scene="1",
         to_scene="8"
     )
+
+    # --- 3b. AGENTIC SUPERVISOR PASS ---
+    if DEFAULT_CONFIG.use_supervisor_agent:
+        logging.info("Step 2b: Running Script Supervisor Agent for continuity audit...")
+        analyzed_scenes = await supervisor.run_audit(analyzed_scenes)
 
     # CLI Progress: This confirms each scene processed with its unique name
     for scene in analyzed_scenes:
