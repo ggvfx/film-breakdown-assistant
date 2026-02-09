@@ -45,8 +45,8 @@ class DataExporter:
                     if e.get('category') == category:
                         # Format: Item (Count) [Source | Confidence]
                         source_abbr = "Expl" if e.get('source') == "explicit" else "Impl"
-                        conf = e.get('confidence', 0)
-                        
+                        # Use 0.0 or 1.0 as a fallback if the AI misses the confidence field
+                        conf = e.get('confidence') if e.get('confidence') is not None else 0.0
                         entry = f"{e.get('name')} ({e.get('count', '1')}) [{source_abbr} | {conf:.2f}]"
                         matching.append(entry)
                 

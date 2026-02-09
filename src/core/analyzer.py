@@ -91,8 +91,13 @@ class ScriptAnalyzer:
                 # Put Review Flags in AD Alerts for export
                 if "flags" in raw_result:
                     for flag in raw_result["flags"]:
+                        # 1. Extract the logic OUTSIDE of the dictionary literal
+                        raw_type = flag.get('flag_type') or "GENERAL"
+                        flag_note = flag.get('note') or "Review required"
+                            
+                        # 2. Now build the alert_element dictionary
                         alert_element = {
-                            "name": f"ALERT: {flag['flag_type'].upper()} - {flag['note']}",
+                            "name": f"ALERT: {raw_type.upper()} - {flag_note}",
                             "category": "AD Alerts",
                             "count": "1",
                             "source": "implied",
