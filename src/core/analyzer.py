@@ -88,26 +88,6 @@ class ScriptAnalyzer:
                 # 3. Merge AI results into the scene dictionary
                 scene.update(raw_result)
 
-                # Put Review Flags in AD Alerts for export
-                if "flags" in raw_result:
-                    for flag in raw_result["flags"]:
-                        # 1. Extract the logic OUTSIDE of the dictionary literal
-                        raw_type = flag.get('flag_type') or "GENERAL"
-                        flag_note = flag.get('note') or "Review required"
-                            
-                        # 2. Now build the alert_element dictionary
-                        alert_element = {
-                            "name": f"ALERT: {raw_type.upper()} - {flag_note}",
-                            "category": "AD Alerts",
-                            "count": "1",
-                            "source": "implied",
-                            "confidence": 1.0
-                        }
-                        # This 'sticks' it into the elements list for the exporter
-                        if "elements" not in scene:
-                            scene["elements"] = []
-                        scene["elements"].append(alert_element)
-
                 # 4. Force-restore the Parser's math to prevent AI 'None' overwrites
                 scene["pages_whole"] = pages_whole
                 scene["pages_eighths"] = pages_eighths

@@ -15,7 +15,7 @@ MMS_CATEGORIES = [
     "Camera", "Special Effects", "Wardrobe", "Makeup/Hair", "Animals",
     "Animal Wrangler", "Music", "Sound", "Art Department", "Set Dressing",
     "Greenery", "Special Equipment", "Security", "Additional Labor",
-    "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes", "AD Alerts"
+    "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes"
 ]
 
 class SourceType(str, Enum):
