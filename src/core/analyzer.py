@@ -12,9 +12,9 @@ from typing import List, Dict, Any, Optional
 # Local modules
 from src.ai.ollama_client import OllamaClient
 # Import the two new pass prompts
-from src.ai.harvester import get_core_prompt, get_elements_prompt
+from src.ai.harvester import get_core_prompt, get_set_prompt, get_action_prompt, get_gear_prompt
 # Import the category split lists
-from src.core.models import PASS_1_CATEGORIES, PASS_2_CATEGORIES
+from src.core.models import PASS_1_CATEGORIES, PASS_2_CATEGORIES, PASS_3_CATEGORIES, PASS_4_CATEGORIES
 
 class ScriptAnalyzer:
     """
@@ -60,7 +60,7 @@ class ScriptAnalyzer:
 
     async def _process_single_scene(self, scene: Dict[str, Any], categories: List[str]):
         """
-        Coordinates the 2-Pass breakdown for a single scene.
+        Coordinates the 4-Pass breakdown (Core, Set, Action, Gear) for a single scene.
         """
         async with self.semaphore:
             if not self.is_running:
@@ -71,11 +71,22 @@ class ScriptAnalyzer:
             is_conservative = self.config.conservative_mode
             allow_implied = self.config.extract_implied_elements
 
-            # Identify which selected categories belong in which pass
+            # Map categories to their respective departmental passes
             active_p1 = [c for c in categories if c in PASS_1_CATEGORIES]
             active_p2 = [c for c in categories if c in PASS_2_CATEGORIES]
+            active_p3 = [c for c in categories if c in PASS_3_CATEGORIES]
+            active_p4 = [c for c in categories if c in PASS_4_CATEGORIES]
 
-            # --- 2. PASS 1: CORE (Synopsis, Description, Cast, BG, Stunts) ---
+            # Store original parser math to prevent AI hallucination overwrite
+            original_math = {
+                "pages_whole": scene.get("pages_whole", 0),
+                "pages_eighths": scene.get("pages_eighths", 0),
+                "scene_number": scene.get("scene_number"),
+                "scene_index": scene.get("scene_index")
+            }
+
+            # --- 2. EXECUTE PASSES ---
+            # Pass 1: Core Narrative & People
             core_prompt = get_core_prompt(
                 scene_text=scene["raw_text"],
                 scene_num=scene["scene_number"],
@@ -86,42 +97,62 @@ class ScriptAnalyzer:
                 conservative=is_conservative,
                 implied=allow_implied
             )
-            
             core_result = await self.client.generate_breakdown(core_prompt, options=llm_options)
 
-            # --- 3. PASS 2: ELEMENTS (Physical Departments) ---
-            # We only run Pass 2 if there are technical categories selected
-            elements_result = {"elements": []}
+            # Pass 2: Set (Vehicles, Art Dept, Greenery, etc.)
+            set_result = {"elements": []}
             if active_p2:
-                elements_prompt = get_elements_prompt(
+                set_prompt = get_set_prompt(
                     scene_text=scene["raw_text"],
                     scene_num=scene["scene_number"],
                     selected_tech_cats=active_p2,
                     conservative=is_conservative,
                     implied=allow_implied
                 )
-                elements_result = await self.client.generate_breakdown(elements_prompt, options=llm_options)
+                set_result = await self.client.generate_breakdown(set_prompt, options=llm_options)
 
-            # --- 4. MERGE & RESTORE ---
+            # Pass 3: Action (Props, SFX, Labor, etc.)
+            action_result = {"elements": []}
+            if active_p3:
+                action_prompt = get_action_prompt(
+                    scene_text=scene["raw_text"],
+                    scene_num=scene["scene_number"],
+                    selected_tech_cats=active_p3,
+                    conservative=is_conservative,
+                    implied=allow_implied
+                )
+                action_result = await self.client.generate_breakdown(action_prompt, options=llm_options)
+
+            # Pass 4: Gear (Camera, Sound, Gear, Misc)
+            gear_result = {"elements": []}
+            if active_p4:
+                gear_prompt = get_gear_prompt(
+                    scene_text=scene["raw_text"],
+                    scene_num=scene["scene_number"],
+                    selected_tech_cats=active_p4,
+                    conservative=is_conservative,
+                    implied=allow_implied
+                )
+                gear_result = await self.client.generate_breakdown(gear_prompt, options=llm_options)
+
+            # --- 3. MERGE & VALIDATE ---
             if core_result:
-                # Capture Parser math to prevent AI overwrite
-                pages_whole = scene.get("pages_whole", 0)
-                pages_eighths = scene.get("pages_eighths", 0)
-
-                # Merge Pass 1 (Synopsis, Elements, etc.)
+                # Merge Pass 1 as the base (Synopsis and Description)
                 scene.update(core_result)
+                
+                # Consolidate elements from all technical passes
+                all_elements = []
+                if "elements" in core_result:
+                    all_elements.extend(core_result["elements"])
+                
+                for res in [set_result, action_result, gear_result]:
+                    if res and "elements" in res:
+                        all_elements.extend(res["elements"])
+                
+                scene["elements"] = all_elements
 
-                # Merge Pass 2 Elements into the existing list
-                if elements_result and "elements" in elements_result:
-                    if "elements" not in scene:
-                        scene["elements"] = []
-                    scene["elements"].extend(elements_result["elements"])
-
-                # Safety: Fix scene identification and restore math
-                scene["scene_number"] = scene["scene_number"]
-                scene["scene_index"] = scene["scene_index"]
-                scene["pages_whole"] = pages_whole
-                scene["pages_eighths"] = pages_eighths
+                # Restore original metadata to maintain integrity
+                scene.update(original_math)
                 
                 return scene
             

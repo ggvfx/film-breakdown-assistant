@@ -1,6 +1,6 @@
 """
 AI Harvester Templates for Script Analysis.
-Split into Core (Pass 1) and Elements (Pass 2) for maximum accuracy.
+Split into Core (Pass 1), Set (Pass 2), Action (Pass 3), Gear (Pass 4) for maximum accuracy.
 """
 
 from typing import List
@@ -48,30 +48,30 @@ def get_core_prompt(
     Location: {int_ext} {set_name} - {day_night}
 
     --- 1. SUMMARIES ---
-    - LENGTH: Estimate scene length in 8ths of a page (e.g., 4/8, 1 2/8).
     - SCENE SUMMARIES:
         - 'synopsis': High-level unique event summary of scene (Max 6 words). 
         - 'description': 1-2 sentences of the plot beats.
     - ELEMENTS: Extract every item in these categories: [{categories_str}].
 
     - CATEGORY DEFINITIONS (STRICT):
-        - Cast Members: Named characters only. Include age if in script (e.g. JAX (32)). NO COUNT.
-        - Background Actors: Unnamed people groups. REQUIRES COUNT. (e.g. TWENTY BYSTANDERS, POLICE).
-        - Stunts: Physical risk (e.g. VAULTING, JUMPING, FIGHTS).
+        - Cast Members: Named characters only. Include age if in script. NO COUNT.
+        - Background Actors: Unnamed people groups. REQUIRES COUNT.
+        - Stunts: Physical actions or risk (e.g. VAULTING, JUMPING, FIGHTING). Extract the action verb only.
 
     --- 2. EXTRACTION RULES ---
-        - ELEMENT SEARCH: Scan Action AND Dialogue for every production item.
-        - NAME FORMAT: Use UPPERCASE for names. Strip all counts from the name string. (Correct: "BYSTANDERS").
-        - CAST vs BG: Named characters = 'Cast Members'. Unnamed groups/crowds = 'Background Actors'.
-        - STUNTS: If it is an action (falls, fights), you MUST extract it.
-        - NO INFERENCE: Only extract items explicitly named. Do not assume "Ivy" or "Cameras" exist just because of the location.
-        - ZERO-FILL: If a category is empty, return []. NEVER use "null", "none", or "N/A".
-        - COUNT LOGIC: Only provide 'count' for 2 or more. If 1, leave 'count' as 1.
-
+        - ELEMENT SEARCH: Scan Action AND Dialogue. Only extract specific requirements.
+        - NAME FORMAT: UPPERCASE names. Strip all counts and ages from the name string.
+        - CAST NO COUNT: Named characters only. NEVER include a numeric count or parentheses.
+        - CAST AGE: The number in parentheses (e.g., "JAX (32)") is an AGE, not a count. DO NOT extract it.
+        - BACKGROUND COUNT: You MUST provide a numeric estimate in parentheses for Background groups (e.g., "BYSTANDERS (10)").
+        - ANTI-HALLUCINATION: Do not extract names from these instructions. Only extract entities explicitly in the SCRIPT TEXT.
+        - STUNTS: Extract the ACTION verb only (e.g. DIVING). NEVER extract sounds (NO "PINGING") or objects (NO "VANS").
+        - NO INFERENCE: Only extract items explicitly named. Do not assume items exist based on the location.
+        - COUNT LOGIC: If a quantity is mentioned, include it in parentheses in the name field, e.g., "ITEM NAME (6)". For single items, just provide the name.
+        - ZERO-FILL: If a category is empty, return [].
+        
     OUTPUT FORMAT ONLY VALID JSON:
     {{
-        "pages_whole": integer,
-        "pages_eighths": integer,
         "synopsis": "string",
         "description": "string",
         "elements": [
@@ -87,15 +87,75 @@ def get_core_prompt(
     {scene_text}
     """
 
-
-def get_elements_prompt(
+def get_set_prompt(
     scene_text: str, 
     scene_num: str,
     selected_tech_cats: List[str],
     conservative: bool = True,
     implied: bool = False
 ) -> str:
-    """Pass 2: Purely technical/physical element extraction."""
+    """Pass 2: Physical Set element extraction."""
+    
+    categories_str = ", ".join(selected_tech_cats)
+
+     # Dynamic Logic Rules
+    logic_rules = ""
+    if conservative:
+        # Focuses strictly on the physical reality described in action blocks
+        logic_rules += "- CONSERVATIVE: Only extract items explicitly used or present in ACTION LINES. Ignore items mentioned in DIALOGUE that do not physically appear.\n"
+    else:
+        # Allows for production prep based on character intent
+        logic_rules += "- LIBERAL: Extract items mentioned in DIALOGUE if they imply a physical requirement for the scene (e.g., a character discussing a specific prop they are holding).\n"
+
+    
+    return f"""
+    TASK: Technical element extraction for Scene {scene_num}.
+
+    --- 1. CATEGORY REFERENCE (FOR DEFINITION ONLY) ---
+    {categories_str}
+        - Vehicles: Picture cars.
+		- Art Department: Fixed architecture/large set builds.
+        - Set Dressing: Items on set NOT handled by actors.
+        - Greenery: Physical plants or landscaping required on set.
+		- Mechanical Effects: Large-scale physical machinery. Note: Different from SFX like fire/smoke.
+
+    --- 2. EXTRACTION RULES ---
+    {logic_rules}
+        - ELEMENT SEARCH: Scan Action AND Dialogue for every production item. Be skeptical. Only extract an item if it is a specific requirement. Avoid "Atmosphere" or "General Vibe" items unless they are physical production requirements.
+        - NAME FORMAT: Use UPPERCASE for names. Strip all counts from the name string.
+        - NO INFERENCE: Only extract items explicitly named.
+        - ZERO-FILL: If a category is empty, return []. NEVER use "null", "none", or "N/A".
+        - COUNT LOGIC: If a quantity is mentioned, include it in parentheses in the name field, e.g., "ITEM NAME (6)". For single items, just provide the name.
+
+    --- 3. FINAL VALIDATION (ZERO-HALLUCINATION CHECK) ---
+        - NO INFERENCE: Only extract items explicitly named. Do not assume "Ivy" exists just because of a garden location.
+        - NO EXAMPLE BLEED: Do NOT extract items from the "CATEGORY REFERENCE" section unless they are literally in the SCRIPT TEXT.
+        - SKEPTICISM: If you cannot find the literal word in the script, do not extract it. Avoid "Atmosphere" or "General Vibe" items.
+
+
+    OUTPUT FORMAT ONLY VALID JSON:
+    {{
+        "elements": [
+            {{
+                "name": "UPPERCASE NAME",
+                "category": "string",
+                "count": "string"
+            }}
+        ]
+    }}
+
+    SCRIPT TEXT:
+    {scene_text}
+    """
+
+def get_action_prompt(
+    scene_text: str, 
+    scene_num: str,
+    selected_tech_cats: List[str],
+    conservative: bool = True,
+    implied: bool = False
+) -> str:
+    """Pass 3: Action element extraction."""
     
     categories_str = ", ".join(selected_tech_cats)
 
@@ -109,44 +169,102 @@ def get_elements_prompt(
         logic_rules += "- LIBERAL: Extract items mentioned in DIALOGUE if they imply a physical requirement for the scene (e.g., a character discussing a specific prop they are holding).\n"
 
     if implied:
-        logic_rules += "- IMPLIED: Automatically add required labor (e.g., if an animal is present, add 'Animal Wrangler').\n"
+        logic_rules += "- IMPLIED LABOR: If an animal is present, you MUST add 'ANIMAL WRANGLER' to the elements. If a weapon is present, you MUST add 'ARMORER'. If a child/minor is present, you MUST add 'TEACHER'.\n"
     
     return f"""
     TASK: Technical element extraction for Scene {scene_num}.
 
-    --- 1. ELEMENTS ---
-    Extract every item in these categories: [{categories_str}].
-
-    - CATEGORY DEFINITIONS (STRICT):
-        - Vehicles: Picture cars (e.g. GETAWAY VAN, 4 POLICE CRUISERS).
-        - Props: Handheld objects handled by cast (e.g. DUFFEL BAGS, GUNS, CASH).
-        - Camera: Specialized camera needs mentioned in action (e.g. HANDHELD, STEADICAM, POV SHOT, GOPRO).
-        - Special Effects (SFX): Physical effects (e.g. BREAKAWAY GLASS, EXPLOSIONS, RAIN, SMOKE, FIRE, SNOW, WET DOWN, SQUIB HITS).
-        - Wardrobe: Specific clothing mentioned that isn't standard (e.g. TUXEDO, BLOODY SHIRT).
-        - Makeup/Hair: Prosthetics, wounds, or specific styles (e.g. FACIAL SCAR, CLOWN MAKEUP).
-        - Animals: Any living creature (e.g. DOG). Requires 'Animal Wrangler' as implied.
+    --- 1. CATEGORY REFERENCE (FOR DEFINITION ONLY) ---
+    {categories_str}
+        - Props: Handheld objects handled by cast.
+		- Special Effects: Physical on-set events like SPARKS, SMOKE, or BREAKING GLASS. If something physical happens (like an explosion or sparking), it MUST be here.
+        - Wardrobe: Specific clothing mentioned that isn't standard.
+        - Makeup/Hair: Prosthetics, wounds, or specific styles.
+        - Animals: Any living creature. Requires 'Animal Wrangler' as implied.
         - Animal Wrangler: Required if there is a living animal required.
-        - Music: Specific songs or instruments mentioned as being played on camera (Diegetic music). Do not include score/soundtrack unless a character reacts to it.
-        - Sound: Specific sound effects that require sync or on-set timing (e.g., LOUD CRASH, SIRENS, GUNSHOT ECHO).
-        - Art Department: Fixed architecture/large set builds (e.g. MARBLE PILLARS, BANK VAULT DOOR).
-        - Set Dressing: Items on set NOT handled by actors (e.g. STACKS OF CASH on shelves).
-        - Greenery: Plants or landscaping (e.g., POTTED PALMS, IVY).
-        - Special Equipment: Technical gear (e.g., UNDERWATER HOUSING, DRONE, CRANE).
-        - Security: 
-        - Additional Labor: Extra crew needed (e.g., ARMORERs for weapons, TEACHER (if children involved)).
-        - Visual Effects (VFX): Items requiring post-production or effects not based in reality (e.g., GREEN SCREEN, DIGITAL DOUBLE, MAGIC SPELL EFFECT, ALIEN CREATURE).
-        - Mechanical Effects: Large-scale physical machinery (e.g., GIMBALS, HYDRAULIC RIGS, BREAKAWAY WALLS). Note: Different from SFX like fire/smoke.
-        - Miscellaneous: Items that are critical but don't fit anywhere else. Examples: "Legal clearance for a logo," "Specific weather conditions needed," or "Coordinating with local precinct" or "requires wet-down of the street," or "Extreme heat—need cooling tents."
-        - Notes:
-        - REJECT: Do not use 'Notes' or 'Security'. These are for human entry only.
+		- Visual Effects: Items requiring post-production or effects not based in reality.
+		- Additional Labor: Extra crew needed (e.g., ARMORERs for weapons, TEACHER (if children involved)).
 
     --- 2. EXTRACTION RULES ---
-        - ELEMENT SEARCH: Scan Action AND Dialogue for every production item.
+    {logic_rules}
+        - ELEMENT SEARCH: Scan Action AND Dialogue for every production item. Be skeptical. Only extract an item if it is a specific requirement. Avoid "Atmosphere" or "General Vibe" items unless they are physical production requirements.
         - NAME FORMAT: Use UPPERCASE for names. Strip all counts from the name string. (Correct: "BYSTANDERS").
-        - SFX: If it is an effect (explosions, rain, shattering), you MUST extract it.
-        - NO INFERENCE: Only extract items explicitly named. Do not assume "Ivy" or "Cameras" exist just because of the location.
+        - SPECIAL EFFECTS: If the script says "sparking," "smoke," or "shatter," you MUST extract an item (e.g., "SPARKS"). NEVER leave this empty if a physical effect is described.
+        - NO INFERENCE: Only extract items explicitly named. Do not assume items exist just because of the location.
         - ZERO-FILL: If a category is empty, return []. NEVER use "null", "none", or "N/A".
-        - COUNT LOGIC: Only provide 'count' for 2 or more. If 1, leave 'count' as 1.
+        - COUNT LOGIC: If a quantity is mentioned, include it in parentheses in the name field, e.g., "ITEM NAME (6)". For single items, just provide the name.
+
+    --- 3. FINAL VALIDATION (ZERO-HALLUCINATION CHECK) ---
+        - NO INFERENCE: Only extract items explicitly named. Do not assume "Ivy" exists just because of a garden location.
+        - NO EXAMPLE BLEED: Do NOT extract items from the "CATEGORY REFERENCE" section unless they are literally in the SCRIPT TEXT.
+        - SKEPTICISM: If you cannot find the literal word in the script, do not extract it. Avoid "Atmosphere" or "General Vibe" items.
+
+
+    OUTPUT FORMAT ONLY VALID JSON:
+    {{
+        "elements": [
+            {{
+                "name": "UPPERCASE NAME",
+                "category": "string",
+                "count": "string"
+            }}
+        ]
+    }}
+
+    SCRIPT TEXT:
+    {scene_text}
+    """
+
+def get_gear_prompt(
+    scene_text: str, 
+    scene_num: str,
+    selected_tech_cats: List[str],
+    conservative: bool = True,
+    implied: bool = False
+) -> str:
+    """Pass 4: Gear element extraction."""
+    
+    categories_str = ", ".join(selected_tech_cats)
+
+     # Dynamic Logic Rules
+    logic_rules = ""
+    if conservative:
+        # Focuses strictly on the physical reality described in action blocks
+        logic_rules += "- CONSERVATIVE: Only extract items explicitly used or present in ACTION LINES. Ignore items mentioned in DIALOGUE that do not physically appear.\n"
+    else:
+        # Allows for production prep based on character intent
+        logic_rules += "- LIBERAL: Extract items mentioned in DIALOGUE if they imply a physical requirement for the scene (e.g., a character discussing a specific prop they are holding).\n"
+
+    return f"""
+    TASK: Technical element extraction for Scene {scene_num}.
+
+    --- 1. CATEGORY REFERENCE (FOR DEFINITION ONLY) ---
+    {categories_str}
+        - Camera: Specialized camera equipment only. 
+        - Music: Diegetic music or instruments only. 
+        - Sound: Specific on-set sound recording needs. 
+        - Special Equipment: Specialized production machinery. NO vehicles. NO props.
+        - Security: (For human entry only).
+        - Miscellaneous: Strictly for PERMITS or LEGAL clearances. NO physical objects.
+        - Notes: (For human entry only).
+        - REJECT: Do not use 'Notes' or 'Security'. NEVER output the category name (e.g. "CAMERA") as an item.
+
+    --- 2. EXTRACTION RULES ---
+    {logic_rules}
+        - ELEMENT SEARCH: Scan Action AND Dialogue.
+        - NAME FORMAT: UPPERCASE name. Strip all counts from the string.
+        - ANTI-HALLUCINATION: NEVER output the category name itself (e.g., "CAMERA") as an element.
+        - NO EXAMPLE BLEED: Do not extract vehicles, props, cash, or prompt examples (like "Technocrane"). If it is a physical object, ignore it in this pass.
+        - PROP REJECTION: If a character can hold it (CASH, BAGS, DETONATOR), it is a PROP. Do not put it in Gear or Misc.
+        - NO INFERENCE: Only extract items explicitly named.
+        - ZERO-FILL: If a category is empty, return [].
+        - COUNT LOGIC: If a quantity is mentioned, include it in parentheses in the name field, e.g., "ITEM NAME (6)". For single items, just provide the name.
+
+    --- 3. FINAL VALIDATION (ZERO-HALLUCINATION CHECK) ---
+        - NO INFERENCE: Only extract items explicitly named. Do not assume "Ivy" exists just because of a garden location.
+        - NO EXAMPLE BLEED: Do NOT extract items from the "CATEGORY REFERENCE" section unless they are literally in the SCRIPT TEXT.
+        - SKEPTICISM: If you cannot find the literal word in the script, do not extract it. Avoid "Atmosphere" or "General Vibe" items.
+
 
     OUTPUT FORMAT ONLY VALID JSON:
     {{

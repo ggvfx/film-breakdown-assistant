@@ -18,12 +18,24 @@ MMS_CATEGORIES = [
     "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes"
 ]
 
-# Pass 1: Narrative & Active Elements
+# Pass 1: Narrative & Core People (get_core_prompt)
 PASS_1_CATEGORIES = ["Cast Members", "Background Actors", "Stunts"]
 
-# Pass 2: Technical & Physical Elements
-# We generate this list automatically by taking everything NOT in Pass 1
-PASS_2_CATEGORIES = [cat for cat in MMS_CATEGORIES if cat not in PASS_1_CATEGORIES]
+# Pass 2: The Physical Set (get_set_prompt)
+PASS_2_CATEGORIES = ["Vehicles", "Art Department", "Set Dressing", "Greenery", "Mechanical Effects"]
+
+# Pass 3: Action & Physical Requirements (get_action_prompt)
+PASS_3_CATEGORIES = [
+    "Props", "Special Effects", "Wardrobe", "Makeup/Hair", 
+    "Animals", "Animal Wrangler", "Visual Effects", "Additional Labor"
+]
+
+# Pass 4: Technical Gear & Misc (get_gear_prompt)
+# Automatically captures remaining categories: Camera, Music, Sound, Special Equipment, etc.
+PASS_4_CATEGORIES = [
+    cat for cat in MMS_CATEGORIES 
+    if cat not in (PASS_1_CATEGORIES + PASS_2_CATEGORIES + PASS_3_CATEGORIES)
+]
 
 class SourceType(str, Enum):
     """Tracks if an element was literally in the text or logically inferred."""
