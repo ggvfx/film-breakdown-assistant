@@ -74,21 +74,13 @@ def get_breakdown_prompt(
         - REJECT: Do not use 'Notes' or 'Security'. These are for human entry only.
         
     --- 2. EXTRACTION RULES ---
-    - ELEMENT SEARCH: Scan Action AND Dialogue for every production item.
-    - NAME & COUNT: Use UPPERCASE for names. If a quantity is mentioned (e.g. TWENTY), put it in the 'count' field.
-    - CAST vs BG: Named characters = 'Cast Members'. Unnamed groups/crowds = 'Background Actors'.
-    - SPECIFICITY: Use '1967 MUSTANG' instead of 'CAR'. 
-    - STOPS: Do NOT output 'source', 'confidence', or '(None)'. If a field is empty, leave it empty.
-
-    --- 3. REVIEW FLAG SCANNING ---
-    Generate 'ReviewFlag' for:
-    - REGULATORY: 'Minor', 'Child', 'Baby' -> Severity 3 (Legal requirement).
-    - SENSITIVE: 'Intimacy', 'Nudity', 'Kiss' -> Severity 2 (Closed set needed).
-    - SAFETY: 'Fire', 'Explosion', 'Fight', 'Fall' -> Severity 3 (Stunt Coordinator needed).
-    - WEAPONRY: 'Gun', 'Knife', 'Sword' -> Severity 3 (Armorer needed).
-    - LOGISTICS: 'Rain', 'Water', 'Car', 'Animal' -> Severity 1 (High cost/prep).
-    - EQUIPMENT: 'Cranes', 'Drones', 'Underwater' -> Severity 1 (High cost/prep).
-    *If none, return []*
+        - ELEMENT SEARCH: Scan Action AND Dialogue for every production item.
+        - NAME FORMAT: Use UPPERCASE for names. Strip all counts from the name string. (Correct: "BYSTANDERS").
+        - CAST vs BG: Named characters = 'Cast Members'. Unnamed groups/crowds = 'Background Actors'.
+        - STUNTS & SFX: If it is an action (falls, fights) or an effect (explosions, rain, shattering), you MUST extract it.
+        - NO INFERENCE: Only extract items explicitly named. Do not assume "Ivy" or "Cameras" exist just because of the location.
+        - ZERO-FILL: If a category is empty, return []. NEVER use "null", "none", or "N/A".
+        - COUNT LOGIC: Only provide 'count' for 2 or more. If 1, leave 'count' as 1.
    
 
     OUTPUT FORMAT ONLY VALID JSON:
@@ -103,14 +95,7 @@ def get_breakdown_prompt(
                 "category": "string",
                 "count": "string"
             }}
-        ],
-        "flags": [
-            {{
-                "flag_type": "string",
-                "note": "string",
-                "severity": integer
-            }}
-        ]
+        ]  
     }}
 
     SCRIPT TEXT:

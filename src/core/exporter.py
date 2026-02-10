@@ -31,7 +31,7 @@ class DataExporter:
                 "Int/Ext": scene.get("int_ext"),
                 "Set": scene.get("set_name"),
                 "Day/Night": scene.get("day_night"),
-                "Pages": display_pages,  # <--- Use the new display_pages variable
+                "Pages": display_pages,
                 "Synopsis": scene.get("synopsis"),
                 "Description": scene.get("description"),
             }
@@ -42,17 +42,29 @@ class DataExporter:
                 matching = []
                 
                 for e in elements:
-                    # Check if 'e' is a dictionary. If it's a string, we skip the .get() call.
                     if isinstance(e, dict):
-                        if e.get('category') == category:
-                            #source_abbr = "Expl" if e.get('source') == "explicit" else "Impl"
-                            #conf = e.get('confidence') if e.get('confidence') is not None else 0.0
-                            entry = f"{e.get('name')} ({e.get('count', '1')})"
+                        # --- SANITIZATION START ---
+                        name = str(e.get('name', '')).strip()
+                        category_match = e.get('category') == category
+                        
+                        # Filter out hallucinations like "null", "none", or empty names
+                        is_valid = name and name.lower() not in ['null', 'none', 'n/a', '((none))']
+                        
+                        if category_match and is_valid:
+                            count = str(e.get('count', '1')).strip().lower()
+                            
+                            # Clean up the count and remove brackets for single items
+                            if count in ['1', 'none', 'null', '', '0', '((none))']:
+                                entry = f"{name.upper()}"
+                            else:
+                                entry = f"{name.upper()} ({count})"
+                                
                             matching.append(entry)
+                        # --- SANITIZATION END ---
                     else:
-                        # If the AI sent a raw string, we treat it as the name and put it in 'Miscellaneous'
-                        if category == "Miscellaneous":
-                            matching.append(f"{str(e).upper()} (1) [Expl | 1.00]")
+                        # Fallback for raw strings
+                        if category == "Miscellaneous" and str(e).lower() not in ['null', 'none']:
+                            matching.append(f"{str(e).upper()}")
                 
                 row[category] = "\n".join(matching)
 
