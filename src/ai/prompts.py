@@ -35,35 +35,30 @@ def get_breakdown_prompt(
     return f"""
     TASK: Perform a technical breakdown of Scene {scene_num}.
 
-    SCENE CONTEXT:
-    Location: {int_ext}. {set_name} - {day_night}
-    
-    SCENE TEXT:
-    {scene_text}
+    CONTEXT:
+    Scene: {scene_num}
+    Location: {int_ext} {set_name} - {day_night}
 
 
     --- 1. SUMMARIES ---
-    - 'length': Estimate the scene length in 8ths of a page (e.g., 4/8, 1 2/8).
-    - 'synopsis': High-level action (Max 6 words). Describe the UNIQUE EVENT of this scene.
-         RULE: Do not repeat location. Focus on the narrative transition.
-    - 'description': A concise 1-2 sentence summary of the plot beats. 
+    - LENGTH: Estimate scene length in 8ths of a page (e.g., 4/8, 1 2/8).
+    - SCENE SUMMARIES:
+       - 'synopsis': High-level unique event summary of scene (Max 6 words). 
+       - 'description': 1-2 sentences of the plot beats.
+    - ELEMENTS: Extract every item in these categories: [{categories_str}].
 
-    --- 2. ELEMENTS ---
-         TECHNICAL MINING: Scan Action AND Dialogue. If a prop is mentioned in speech (e.g., "I have a gun"), extract it.
-         Extract every item belonging to these categories: [{categories_str}]. If none, leave blank.
-
-    - CATEGORY DEFINITIONS (GUIDE RAILS):
-        - Cast Members: Specific named characters only. NO COUNT. (e.g. JAX (32)).
-        - Background Actors: Unnamed groups (e.g. BYSTANDERS, POLICE). REQUIRES COUNT.
+    - CATEGORY DEFINITIONS (STRICT):
+        - Cast Members: Named characters only. Include age if in script (e.g. JAX (32)). NO COUNT.
+        - Background Actors: Unnamed people groups. REQUIRES COUNT. (e.g. TWENTY BYSTANDERS, POLICE).
         - Stunts: Physical risk (e.g. VAULTING, JUMPING, FIGHTS).
         - Vehicles: Picture cars (e.g. GETAWAY VAN, 4 POLICE CRUISERS).
-        - Props: Handheld tools/objects handled by cast (e.g. DUFFEL BAGS, GUNS, CASH).
-        - Camera: Specialized camera needs mentioned in action (e.g., HANDHELD, STEADICAM, POV SHOT, GOPRO).
-        - Special Effects (SFX): Physical onset effects (e.g., BREAKAWAY GLASS, EXPLOSIONS, RAIN, SMOKE, FIRE, SNOW, WET DOWN, SQUIB HITS).
-        - Wardrobe: Specific clothing mentioned that isn't standard (e.g., TUXEDO, BLOODY SHIRT).
-        - Makeup/Hair: Prosthetics, wounds, or specific styles (e.g., FACIAL SCAR, CLOWN MAKEUP).
+        - Props: Handheld objects handled by cast (e.g. DUFFEL BAGS, GUNS, CASH).
+        - Camera: Specialized camera needs mentioned in action (e.g. HANDHELD, STEADICAM, POV SHOT, GOPRO).
+        - Special Effects (SFX): Physical effects (e.g. BREAKAWAY GLASS, EXPLOSIONS, RAIN, SMOKE, FIRE, SNOW, WET DOWN, SQUIB HITS).
+        - Wardrobe: Specific clothing mentioned that isn't standard (e.g. TUXEDO, BLOODY SHIRT).
+        - Makeup/Hair: Prosthetics, wounds, or specific styles (e.g. FACIAL SCAR, CLOWN MAKEUP).
         - Animals: Any living creature (e.g. DOG). Requires 'Animal Wrangler' as implied.
-        - Animal Wrangler: Required if there is a living animal.
+        - Animal Wrangler: Required if there is a living animal required.
         - Music: Specific songs or instruments mentioned as being played on camera (Diegetic music). Do not include score/soundtrack unless a character reacts to it.
         - Sound: Specific sound effects that require sync or on-set timing (e.g., LOUD CRASH, SIRENS, GUNSHOT ECHO).
         - Art Department: Fixed architecture/large set builds (e.g. MARBLE PILLARS, BANK VAULT DOOR).
@@ -78,30 +73,23 @@ def get_breakdown_prompt(
         - Notes:
         - REJECT: Do not use 'Notes' or 'Security'. These are for human entry only.
         
-        [Routing Note: Buildings are NOT elements. Cars are vehicles, not props. If it shatters or sparks, it is SFX, not a Prop.]
+    --- 2. EXTRACTION RULES ---
+    - ELEMENT SEARCH: Scan Action AND Dialogue for every production item.
+    - NAME & COUNT: Use UPPERCASE for names. If a quantity is mentioned (e.g. TWENTY), put it in the 'count' field.
+    - CAST vs BG: Named characters = 'Cast Members'. Unnamed groups/crowds = 'Background Actors'.
+    - SPECIFICITY: Use '1967 MUSTANG' instead of 'CAR'. 
+    - STOPS: Do NOT output 'source', 'confidence', or '(None)'. If a field is empty, leave it empty.
 
-    --- 3. ELEMENT FORMATTING ---
-    - 'name': UPPERCASE. Be SPECIFIC (If age is in script, include it for Cast (e.g. JAX (32), '1967 MUSTANG' instead of 'CAR' if established). 
-    - 'count': How many? (e.g., "6", "2", or "1"). Use "1" as default. Digit string (e.g. "20"). For Cast Members, no count.
-    - 'source': 'explicit' if literally in text, 'implied' if it must exist (e.g. 'Smoke' for a 'Fire').
-    - 'confidence': score between 0.0 and 1.0.
-
-    --- 4. REVIEW FLAG SCANNING ---
-    If you detect the following keywords, you MUST generate a 'ReviewFlag' entry:
+    --- 3. REVIEW FLAG SCANNING ---
+    Generate 'ReviewFlag' for:
     - REGULATORY: 'Minor', 'Child', 'Baby' -> Severity 3 (Legal requirement).
     - SENSITIVE: 'Intimacy', 'Nudity', 'Kiss' -> Severity 2 (Closed set needed).
     - SAFETY: 'Fire', 'Explosion', 'Fight', 'Fall' -> Severity 3 (Stunt Coordinator needed).
     - WEAPONRY: 'Gun', 'Knife', 'Sword' -> Severity 3 (Armorer needed).
     - LOGISTICS: 'Rain', 'Water', 'Car', 'Animal' -> Severity 1 (High cost/prep).
     - EQUIPMENT: 'Cranes', 'Drones', 'Underwater' -> Severity 1 (High cost/prep).
-    *STRICT: If no risk is detected, return an empty array []. NEVER use the word "None".*
+    *If none, return []*
    
-    - EXCLUSIONS:
-        - Do not list inanimate objects (like 'PRECINCT' or 'CAR') as people. 
-        - If an item is a vehicle, put it in 'Vehicles'. If it's a tool, 'Props'.
-        - NEVER list inanimate objects (e.g., PILLAR) as 'Background Actors'.
-        - Unnamed roles (e.g. POLICE) are ALWAYS Background, NEVER Cast.
-        - Do not list buildings or locations as elements.
 
     OUTPUT FORMAT ONLY VALID JSON:
     {{
@@ -111,11 +99,9 @@ def get_breakdown_prompt(
         "description": "string",
         "elements": [
             {{
-                "name": "string",
+                "name": "UPPERCASE NAME",
                 "category": "string",
-                "count": "string",
-                "source": "explicit/implied",
-                "confidence": float
+                "count": "string"
             }}
         ],
         "flags": [

@@ -45,9 +45,9 @@ class DataExporter:
                     # Check if 'e' is a dictionary. If it's a string, we skip the .get() call.
                     if isinstance(e, dict):
                         if e.get('category') == category:
-                            source_abbr = "Expl" if e.get('source') == "explicit" else "Impl"
-                            conf = e.get('confidence') if e.get('confidence') is not None else 0.0
-                            entry = f"{e.get('name')} ({e.get('count', '1')}) [{source_abbr} | {conf:.2f}]"
+                            #source_abbr = "Expl" if e.get('source') == "explicit" else "Impl"
+                            #conf = e.get('confidence') if e.get('confidence') is not None else 0.0
+                            entry = f"{e.get('name')} ({e.get('count', '1')})"
                             matching.append(entry)
                     else:
                         # If the AI sent a raw string, we treat it as the name and put it in 'Miscellaneous'
