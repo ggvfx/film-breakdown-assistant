@@ -7,7 +7,9 @@ Movie Magic Scheduling category defaults.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Dict
+from src.core.models import MMS_CATEGORIES
+
 
 @dataclass
 class ProjectConfig:
@@ -44,6 +46,10 @@ class ProjectConfig:
         "Greenery", "Special Equipment", "Security", "Additional Labor",
         "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes"
     ])
+
+    category_selection: Dict[str, bool] = field(default_factory=lambda: {
+        cat: True for cat in MMS_CATEGORIES
+    })
 
     # Path Settings
     output_dir: str = "outputs"

@@ -6,7 +6,6 @@ from src.core.analyzer import ScriptAnalyzer
 from src.core.exporter import DataExporter
 from src.ai.ollama_client import OllamaClient
 from src.core.config import DEFAULT_CONFIG
-#from src.core.supervisor_agent import SupervisorAgent
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -19,7 +18,7 @@ async def main():
     client = OllamaClient(model_name=DEFAULT_CONFIG.ollama_model) 
     
     # Use the worker_threads from your config (currently 1)
-    analyzer = ScriptAnalyzer(client, concurrency_limit=DEFAULT_CONFIG.worker_threads)
+    analyzer = ScriptAnalyzer(client, config=DEFAULT_CONFIG)
     #supervisor = SupervisorAgent(client)
     exporter = DataExporter()
 
@@ -49,8 +48,8 @@ async def main():
     analyzed_scenes = await analyzer.run_breakdown(
         scenes=scenes,
         selected_categories=selected_categories,
-        from_scene="1",
-        to_scene="8"
+        from_scene=None,
+        to_scene=None
     )
 
     # CLI Progress: This confirms each scene processed with its unique name

@@ -11,17 +11,20 @@ from typing import List, Dict, Any, Optional
 
 # Local modules
 from src.ai.ollama_client import OllamaClient
-from src.ai.harvester import get_breakdown_prompt
+# Import the two new pass prompts
+from src.ai.harvester import get_core_prompt, get_elements_prompt
+# Import the category split lists
+from src.core.models import PASS_1_CATEGORIES, PASS_2_CATEGORIES
 
 class ScriptAnalyzer:
     """
     Manages the batch processing of scenes through the AI.
     """
 
-    def __init__(self, client: OllamaClient, concurrency_limit: int = 1):
+    def __init__(self, client: OllamaClient, config):
         self.client = client
-        # This 'gatekeeper' controls how many scenes run at once
-        self.semaphore = asyncio.Semaphore(concurrency_limit)
+        self.config = config 
+        self.semaphore = asyncio.Semaphore(config.worker_threads) 
         self.is_running = True
 
     async def run_breakdown(
@@ -57,38 +60,66 @@ class ScriptAnalyzer:
 
     async def _process_single_scene(self, scene: Dict[str, Any], categories: List[str]):
         """
-        A single worker task that waits for its turn to talk to the AI.
+        Coordinates the 2-Pass breakdown for a single scene.
         """
         async with self.semaphore:
             if not self.is_running:
                 return None
 
-            # Build the prompt using the Parser's clean components
-            prompt = get_breakdown_prompt(
+            # --- 1. PREP SETTINGS & CATEGORIES ---
+            llm_options = {"temperature": self.config.temperature}
+            is_conservative = self.config.conservative_mode
+            allow_implied = self.config.extract_implied_elements
+
+            # Identify which selected categories belong in which pass
+            active_p1 = [c for c in categories if c in PASS_1_CATEGORIES]
+            active_p2 = [c for c in categories if c in PASS_2_CATEGORIES]
+
+            # --- 2. PASS 1: CORE (Synopsis, Description, Cast, BG, Stunts) ---
+            core_prompt = get_core_prompt(
                 scene_text=scene["raw_text"],
-                selected_categories=categories,
                 scene_num=scene["scene_number"],
                 set_name=scene["set_name"],
                 day_night=scene["day_night"],
-                int_ext=scene["int_ext"]
+                int_ext=scene["int_ext"],
+                selected_core_cats=active_p1,
+                conservative=is_conservative,
+                implied=allow_implied
             )
-
-            # Send to AI
-            raw_result = await self.client.generate_breakdown(prompt)
             
-            if raw_result:
-                # 1. Capture the Parser's valid math before the AI merge
+            core_result = await self.client.generate_breakdown(core_prompt, options=llm_options)
+
+            # --- 3. PASS 2: ELEMENTS (Physical Departments) ---
+            # We only run Pass 2 if there are technical categories selected
+            elements_result = {"elements": []}
+            if active_p2:
+                elements_prompt = get_elements_prompt(
+                    scene_text=scene["raw_text"],
+                    scene_num=scene["scene_number"],
+                    selected_tech_cats=active_p2,
+                    conservative=is_conservative,
+                    implied=allow_implied
+                )
+                elements_result = await self.client.generate_breakdown(elements_prompt, options=llm_options)
+
+            # --- 4. MERGE & RESTORE ---
+            if core_result:
+                # Capture Parser math to prevent AI overwrite
                 pages_whole = scene.get("pages_whole", 0)
                 pages_eighths = scene.get("pages_eighths", 0)
 
-                # 2. Existing safety overrides - Fix the AI result before merging
-                raw_result["scene_number"] = scene["scene_number"]
-                raw_result["scene_index"] = scene["scene_index"]
+                # Merge Pass 1 (Synopsis, Elements, etc.)
+                scene.update(core_result)
 
-                # 3. Merge AI results into the scene dictionary
-                scene.update(raw_result)
+                # Merge Pass 2 Elements into the existing list
+                if elements_result and "elements" in elements_result:
+                    if "elements" not in scene:
+                        scene["elements"] = []
+                    scene["elements"].extend(elements_result["elements"])
 
-                # 4. Force-restore the Parser's math to prevent AI 'None' overwrites
+                # Safety: Fix scene identification and restore math
+                scene["scene_number"] = scene["scene_number"]
+                scene["scene_index"] = scene["scene_index"]
                 scene["pages_whole"] = pages_whole
                 scene["pages_eighths"] = pages_eighths
                 

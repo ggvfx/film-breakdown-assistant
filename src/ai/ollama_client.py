@@ -17,7 +17,7 @@ class OllamaClient:
     def __init__(self, model_name: str = "llama3.2"):
         self.model_name = model_name
 
-    async def generate_breakdown(self, prompt: str) -> Optional[Dict[str, Any]]:
+    async def generate_breakdown(self, prompt: str, options: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
         """
         Sends the prompt to Ollama and returns the structured JSON data.
         """
@@ -28,7 +28,8 @@ class OllamaClient:
             response = await client.generate(
                 model=self.model_name,
                 prompt=prompt,
-                format="json"  # This is the "magic" that keeps the AI in line!
+                format="json",
+                options=options or {}
             )
             
             # The response is a string, so we turn it into a Python dictionary

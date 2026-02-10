@@ -18,6 +18,13 @@ MMS_CATEGORIES = [
     "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes"
 ]
 
+# Pass 1: Narrative & Active Elements
+PASS_1_CATEGORIES = ["Cast Members", "Background Actors", "Stunts"]
+
+# Pass 2: Technical & Physical Elements
+# We generate this list automatically by taking everything NOT in Pass 1
+PASS_2_CATEGORIES = [cat for cat in MMS_CATEGORIES if cat not in PASS_1_CATEGORIES]
+
 class SourceType(str, Enum):
     """Tracks if an element was literally in the text or logically inferred."""
     EXPLICIT = "explicit"
