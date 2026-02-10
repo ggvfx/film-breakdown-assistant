@@ -40,25 +40,56 @@ class SupervisorAgent:
 
     def _build_global_context(self, scenes: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Compiles a list of all unique high-value elements found across the script.
+        Compiles a list of unique high-value elements.
+        Ensures 'NAME (AGE)' versions prioritized over plain 'NAME'.
         """
         context = {
             "cast": set(),
+            "background": set(),
             "vehicles": set(),
-            "key_props": set()
+            "props": set(),
+            "stunts": set(),
+            "sfx": set()
         }
         for scene in scenes:
             for element in scene.get("elements", []):
                 cat = element.get("category")
-                name = element.get("name").upper()
+                raw_name = element.get("name")
+                
+                if not raw_name:
+                    continue
+                
+                name = raw_name.upper()
+                
                 if cat == "Cast Members":
                     context["cast"].add(name)
+                elif cat == "Background Actors":
+                    context["background"].add(name)
                 elif cat == "Vehicles":
                     context["vehicles"].add(name)
                 elif cat == "Props":
-                    context["key_props"].add(name)
+                    context["props"].add(name)
+                elif cat == "Stunts":
+                    context["stunts"].add(name)
+                elif cat == "Special Effects":
+                    context["sfx"].add(name)
         
-        return {k: list(v) for k, v in context.items()}
+        # --- CLEANUP LOGIC ---
+        # If we have "JAX (32)" and "JAX", remove "JAX" so the AI only sees the aged version.
+        cast_list = list(context["cast"])
+        final_cast = [name for name in cast_list if not any(
+            (name + " (") in other for other in cast_list
+        )]
+
+        return {
+            "cast": final_cast,
+            "background": list(context["background"]),
+            "vehicles": list(context["vehicles"]),
+            "props": list(context["props"]),
+            "stunts": list(context["stunts"]),
+            "sfx": list(context["sfx"])
+        }
+
 
     async def _audit_single_scene(self, scene: Dict[str, Any], context: Dict, prev_scene: Dict = None) -> Dict[str, Any]:
         """
@@ -71,35 +102,83 @@ class SupervisorAgent:
 
         GLOBAL CONTEXT (World State):
         - Cast: {context['cast']}
-        - Known Vehicles: {context['vehicles']}
-        - Key Props: {context['key_props']}
+        - Background: {context['background']}
+        - Vehicles: {context['vehicles']}
+        - Known Props: {context['props']}
+        - Known Stunts: {context['stunts']}
+        - Known SFX: {context['sfx']}
 
         CURRENT SCENE DATA:
         - Synopsis: {scene['synopsis']}
-        - Current Elements: {[e['name'] for e in scene['elements']]}
+        - Description: {scene.get('description', '')}
+        - Current Elements: {[e.get('name', 'UNKNOWN') for e in scene.get('elements', [])]}
+        - Current Flags: {scene.get('flags', [])}
         
         PREVIOUS SCENE CONTEXT (If relevant):
-        - Set: {prev_scene['set_name'] if prev_scene else 'N/A'}
-        - Day/Night: {prev_scene['day_night'] if prev_scene else 'N/A'}
+        - Set: {prev_scene.get('set_name', 'N/A') if prev_scene else 'N/A'}
+        - Day/Night: {prev_scene.get('day_night', 'N/A') if prev_scene else 'N/A'}
 
         TASK:
-        1. SPECIFICITY: If the scene mentions a 'CAR' but the Global Context knows it is a '1967 MUSTANG', update the name.
-        2. DIALOGUE: If a prop is mentioned in dialogue but missing from elements, add it.
-        3. CONTINUITY: If this scene is CONTINUOUS with the previous, ensure characters and physical states (like wounds) match.
+        1. SPECIFICITY: Check the Global Context. If a scene mentions a generic 'CAR' or 'VAN' but the Global Context knows it is the 'GETAWAY VAN', you MUST update the name to 'GETAWAY VAN'. 
+        2. CONTINUITY: Ensure character names and physical states are consistent. If JAX is established as 'JAX (32)' in the Global Context, update every instance of 'JAX' to 'JAX (32)'. If a character is 'WET' from rain in Scene 2, they must remain 'WET' in Scene 3 (Continuous).
+        3. DEPARTMENTAL LOGIC: 
+            - Perform a 'Rule of Touch' audit: If an item is a large architectural build (e.g., COUNTER, PILLAR, VAULT DOOR), move it from 'Props' to 'Art Department'.
+            - Action-to-Element: If a synopsis/description mentions 'VAULTING', 'FIGHTING', or 'JUMPING', ensure a corresponding 'Stunt' element exists.
+        4. COUNTS & DIALOGUE: 
+            - Re-scan scene text for specific digits. If 'TWENTY BYSTANDERS' are mentioned, the 'BYSTANDERS' element MUST have a count of '20'.
+            - Extract props mentioned in dialogue (e.g., the 'Silent Alarm') even if they aren't in the action lines.
+        5. CLEANUP: If the first pass left 'None' or 'N/A' in flags/alerts, remove them and return an empty array [] unless a real risk is found.
 
-        OUTPUT: Return ONLY the updated "elements" list as JSON.
+        OUTPUT: Return ONLY a JSON object containing "elements": [] and "flags": [].
         """
 
         try:
-            response = await self.client.generate_response(prompt)
-            # Basic JSON extraction logic (similar to analyzer.py)
-            updated_elements = self._parse_json_response(response)
-            if updated_elements:
-                scene["elements"] = updated_elements
-        except Exception as e:
-            self.logger.error(f"Audit failed for scene {scene['scene_number']}: {e}")
+            # 1. Get the raw result
+            raw_response = await self.client.generate_breakdown(prompt)
+            
+            # 2. FORCE PARSE: Turn raw string into list or dict
+            if isinstance(raw_response, str):
+                audited_result = self._parse_json_response(raw_response)
+            else:
+                audited_result = raw_response
+            
+            # CASE A: AI returned a dictionary (likely containing 'elements' and 'flags')
+            if isinstance(audited_result, dict):
+                # If the AI included the scene_number, we merge everything (your existing logic)
+                if "scene_number" in audited_result:
+                    scene.update({k: v for k, v in audited_result.items() if v is not None})
+                else:
+                    # If it only returned the lists, we stitch them into the original scene
+                    if "elements" in audited_result:
+                        scene["elements"] = audited_result["elements"]
+                    if "flags" in audited_result:
+                        scene["flags"] = audited_result["flags"]
+                return scene
+            
+            # CASE B: AI returned a LIST (Rescue Mission for strings)
+            if isinstance(audited_result, list):
+                valid_elements = []
+                for item in audited_result:
+                    if isinstance(item, dict):
+                        valid_elements.append(item)
+                    else:
+                        # Your existing string protection logic
+                        valid_elements.append({
+                            "name": str(item).upper(), 
+                            "category": "Cast Members" if "(" in str(item) else "Miscellaneous", 
+                            "count": "1"
+                        })
+                # Re-apply to the ORIGINAL scene to keep metadata alive
+                scene["elements"] = valid_elements
+                return scene
 
-        return scene
+            # Final Fallback
+            return scene
+            
+        except Exception as e:
+            self.logger.error(f"Audit failed for scene {scene.get('scene_number', 'Unknown')}: {e}")
+            return scene
+        
 
     def _parse_json_response(self, text: str) -> List[Dict]:
         # Implementation of JSON cleaning/parsing from Ollama output

@@ -42,21 +42,33 @@ class DataExporter:
                 matching = []
                 
                 for e in elements:
-                    if e.get('category') == category:
-                        # Format: Item (Count) [Source | Confidence]
-                        source_abbr = "Expl" if e.get('source') == "explicit" else "Impl"
-                        # Use 0.0 or 1.0 as a fallback if the AI misses the confidence field
-                        conf = e.get('confidence') if e.get('confidence') is not None else 0.0
-                        entry = f"{e.get('name')} ({e.get('count', '1')}) [{source_abbr} | {conf:.2f}]"
-                        matching.append(entry)
+                    # Check if 'e' is a dictionary. If it's a string, we skip the .get() call.
+                    if isinstance(e, dict):
+                        if e.get('category') == category:
+                            source_abbr = "Expl" if e.get('source') == "explicit" else "Impl"
+                            conf = e.get('confidence') if e.get('confidence') is not None else 0.0
+                            entry = f"{e.get('name')} ({e.get('count', '1')}) [{source_abbr} | {conf:.2f}]"
+                            matching.append(entry)
+                    else:
+                        # If the AI sent a raw string, we treat it as the name and put it in 'Miscellaneous'
+                        if category == "Miscellaneous":
+                            matching.append(f"{str(e).upper()} (1) [Expl | 1.00]")
                 
                 row[category] = "\n".join(matching)
 
-            # 3. Add Review Flags for the AD
-            row["Review Flags"] = "\n".join([
-                f"[{f['flag_type']}] {f['note']} (Sev: {f['severity']})" 
-                for f in scene.get('flags', [])
-            ])
+            # 3. Add Review Flags for the AD (Surgical Fix)
+            formatted_flags = []
+            for f in scene.get('flags', []):
+                if isinstance(f, dict):
+                    f_type = f.get('flag_type', 'ALERT')
+                    f_note = f.get('note', 'Review required')
+                    f_sev = f.get('severity', 1)
+                    formatted_flags.append(f"[{f_type}] {f_note} (Sev: {f_sev})")
+                else:
+                    # Fallback if AI returned a string instead of a dict
+                    formatted_flags.append(f"[ALERT] {str(f)} (Sev: 1)")
+            
+            row["Review Flags"] = "\n".join(formatted_flags)
 
             flattened_data.append(row)
 
