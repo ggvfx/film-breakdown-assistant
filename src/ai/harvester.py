@@ -1,5 +1,5 @@
 """
-AI Prompt Templates for Script Analysis.
+AI Harvester Templates for Script Analysis.
 
 This module focuses strictly on extraction of production elements. 
 Header data is provided by the Parser to ensure 100% accuracy for 

@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Optional
 
 # Local modules
 from src.ai.ollama_client import OllamaClient
-from src.ai.prompts import get_breakdown_prompt
+from src.ai.harvester import get_breakdown_prompt
 
 class ScriptAnalyzer:
     """
