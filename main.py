@@ -39,7 +39,7 @@ async def main():
     scenes = parser.split_into_scenes(raw_text)
     logging.info(f"Found {len(scenes)} scenes.")
 
-# --- 3. ANALYZE (The AI Part) ---
+    # --- 3. ANALYZE (The AI Part) ---
     logging.info(f"Step 2: Sending {len(scenes)} scenes to AI (Ollama)...")
     
     selected_categories = DEFAULT_CONFIG.mms_categories
@@ -55,6 +55,24 @@ async def main():
     # CLI Progress: This confirms each scene processed with its unique name
     for scene in analyzed_scenes:
         logging.info(f"DONE: Scene {scene.get('scene_number')} - {scene.get('set_name')} ({scene.get('day_night')})")
+
+    # --- 3.5 CONTINUITY PASS (Conditional) ---
+    if DEFAULT_CONFIG.use_continuity_agent:
+        logging.info("Step 2.5: Running Script Supervisor check...")
+        master_history = []
+
+        for scene in analyzed_scenes:
+            # 1. Provide history string of names found in previous scenes
+            history_str = ", ".join(list(set(master_history)))
+            
+            # 2. Run continuity and save result directly to the dictionary
+            notes = await analyzer.run_continuity_pass(scene, history_str)
+            scene['continuity_notes'] = notes
+            
+            # 3. Update history for the next scene in the loop
+            current_items = [el.get('name') for el in scene.get('elements', []) if isinstance(el, dict)]
+            master_history.extend(current_items)
+    
 
     # --- 4. EXPORT ---
     logging.info("Step 3: Generating Excel validation sheet...")

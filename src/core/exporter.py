@@ -33,7 +33,7 @@ class DataExporter:
                 "Day/Night": scene.get("day_night"),
                 "Pages": display_pages,
                 "Synopsis": scene.get("synopsis"),
-                "Description": scene.get("description"),
+                "Description": scene.get("description")
             }
 
             # 2. Add MMS Categories with diagnostic info
@@ -68,7 +68,10 @@ class DataExporter:
                 
                 row[category] = "\n".join(matching)
 
-            # 3. Add Review Flags for the AD (Surgical Fix)
+            # 2.5 Add Continuity Notes AFTER departments
+            row["Continuity Notes"] = scene.get("continuity_notes", "")
+
+            # 3. Add Review Flags
             formatted_flags = []
             for f in scene.get('flags', []):
                 if isinstance(f, dict):

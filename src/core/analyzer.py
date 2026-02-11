@@ -16,6 +16,10 @@ from src.ai.harvester import get_core_prompt, get_set_prompt, get_action_prompt,
 # Import the category split lists
 from src.core.models import PASS_1_CATEGORIES, PASS_2_CATEGORIES, PASS_3_CATEGORIES, PASS_4_CATEGORIES
 
+# Agentic passes
+from src.ai.continuity_agent import get_continuity_prompt
+
+
 class ScriptAnalyzer:
     """
     Manages the batch processing of scenes through the AI.
@@ -157,6 +161,42 @@ class ScriptAnalyzer:
                 return scene
             
             return None
+        
+
+    async def run_continuity_pass(self, scene_data: dict, history_summary: str) -> str:
+        prompt = get_continuity_prompt(
+            current_scene_text=scene_data.get('raw_text', ""),
+            current_scene_num=scene_data.get('scene_number', "0"),
+            history_summary=history_summary
+        )
+        
+        response = await self.client.generate_breakdown(prompt)
+        if not response:
+            return ""
+
+        # Use .get() but provide fallbacks for common model 'drifts'
+        notes = response.get('continuity_notes') or response.get('continuity') or []
+        
+        # If the AI returns a dict instead of a list (as seen in your debug logs)
+        if isinstance(notes, dict):
+            notes = notes.get('checks') or notes.get('notes') or []
+
+        if not notes:
+            return ""
+        
+        formatted = []
+        for n in notes:
+            if isinstance(n, dict):
+                # Map potential halluncinated keys back to our required format
+                name = n.get('item_name') or n.get('item') or "Unknown"
+                spec = n.get('resolved_specificity') or n.get('specificity_mapping') or "N/A"
+                note = n.get('note') or n.get('call_out') or n.get('message') or ""
+                formatted.append(f"{name} -> {spec}: {note}")
+            elif isinstance(n, str):
+                formatted.append(n)
+
+        return "\n".join(formatted)
+
 
     def _filter_scenes(self, scenes, start_num, end_num):
         """Filters the master list based on scene IDs like '15A'."""
