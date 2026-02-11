@@ -59,20 +59,30 @@ async def main():
     # --- 3.5 CONTINUITY PASS (Conditional) ---
     if DEFAULT_CONFIG.use_continuity_agent:
         logging.info("Step 2.5: Running Script Supervisor check...")
-        master_history = []
+        master_history_dict = {}
 
         for scene in analyzed_scenes:
-            # 1. Provide history string of names found in previous scenes
-            history_str = ", ".join(list(set(master_history)))
+            # 1. Format history as a clean "Catalog"
+            history_lines = []
+            for cat, items in master_history_dict.items():
+                # Sorting items helps the model process them consistently
+                sorted_items = sorted(list(items))
+                history_lines.append(f"CATEGORY {cat}: {', '.join(sorted_items)}")
             
-            # 2. Run continuity and save result directly to the dictionary
+            history_str = "\n".join(history_lines) if history_lines else "CATALOG EMPTY."
+            
+            # 2. Run continuity
             notes = await analyzer.run_continuity_pass(scene, history_str)
             scene['continuity_notes'] = notes
             
-            # 3. Update history for the next scene in the loop
-            current_items = [el.get('name') for el in scene.get('elements', []) if isinstance(el, dict)]
-            master_history.extend(current_items)
-    
+            # 3. Update history (Keep it categorized)
+            for el in scene.get('elements', []):
+                if isinstance(el, dict) and el.get('name') and el.get('category'):
+                    cat = el['category'].upper()
+                    name = el['name'].upper()
+                    if cat not in master_history_dict:
+                        master_history_dict[cat] = set()
+                    master_history_dict[cat].add(name)
 
     # --- 4. EXPORT ---
     logging.info("Step 3: Generating Excel validation sheet...")

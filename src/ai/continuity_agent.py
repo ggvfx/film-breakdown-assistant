@@ -16,44 +16,61 @@ class ContinuityFlag(BaseModel):
 class ContinuityResponse(BaseModel):
     continuity_notes: List[ContinuityFlag] = Field(description="List of specificity or tracking call-outs")
 
-def get_continuity_prompt(
-    current_scene_text: str,
-    current_scene_num: str,
-    history_summary: str
-) -> str:
-    """
-    Generates a prompt for the Script Supervisor agent.
-    Maintains all extraction rules while enforcing schema compliance.
-    """
+
+def get_matchmaker_prompt(current_scene_text: str, current_scene_num: str, history_summary: str) -> str:
     return f"""
-    TASK: Script Supervisor Continuity Check for Scene {current_scene_num}.
+    TASK: Script Supervisor Matchmaker - Scene {current_scene_num}
     
-    CONTEXT (PREVIOUSLY ESTABLISHED ITEMS): 
+    REFERENCE CATALOG:
     {history_summary}
     
     CURRENT SCRIPT TEXT:
     {current_scene_text}
 
-    --- EXTRACTION RULES ---
-    1. SPECIFICITY MAPPING: Map generic mentions (e.g., 'the car', 'the bags') to established specific items (e.g., 'PORSCHE', 'DUFFEL BAGS').
-    2. CALL-OUT: Link generic mentions to specific production items in the note.
-    3. STATE CHANGES: Identify if items are destroyed or altered (e.g., 'Pillar is now shattered').
-    4. LOGIC ONLY: Do not hallucinate. Only map current text to established history.
+    --- MANDATORY LOGIC ---
+    1. SPECIFICITY LOOKUP: Identify generic nouns in the CURRENT SCRIPT. Look for a match in the REFERENCE CATALOG. 
+       - If Script says "The [Generic Item]" and Catalog has a "[Specific Version]", map them.
+    2. ZERO HALLUCINATION RULE: 
+       - Do NOT use items from the prompt examples. 
+       - Do NOT use items from the catalog unless they are the SAME OBJECT as the script noun.
+       - If no match exists, return "continuity_notes": [].
+    3. IGNORE CHARACTERS: Do not map people (George, Mary, etc).
 
-    --- OUTPUT INSTRUCTIONS ---
-    You MUST return a JSON object with the key "continuity_notes".
-    Every finding (Mapping or State Change) must be an object in that list.
-
-    EXAMPLE FOR STATE CHANGE:
-    item_name: "Pillar", resolved_specificity: "MARBLE PILLAR", note: "Now shattered by police blast"
-
-    OUTPUT FORMAT:
+    --- OUTPUT FORMAT ---
+    Return ONLY valid JSON:
     {{
       "continuity_notes": [
         {{
-          "item_name": "string",
-          "resolved_specificity": "string",
-          "note": "string"
+          "item_name": "Noun from script",
+          "resolved_specificity": "Exact match from Reference Catalog",
+          "note": "State change or production instruction"
+        }}
+      ]
+    }}
+    """
+
+def get_observer_prompt(current_scene_text: str, current_scene_num: str) -> str:
+    return f"""
+    TASK: Script Supervisor Observer - Scene {current_scene_num}
+    
+    CURRENT SCRIPT TEXT:
+    {current_scene_text}
+
+    --- MANDATORY LOGIC ---
+    1. STATE CHANGES: If an item in the script is damaged or altered, record its NEW CONDITION in the 'note' field.
+    2. ZERO HALLUCINATION RULE: 
+       - Do NOT use items from the prompt examples. 
+       - Do NOT use items from the catalog unless they are the SAME OBJECT as the script noun.
+       - If no match exists, return "continuity_notes": [].
+
+    --- OUTPUT FORMAT ---
+    Return ONLY valid JSON:
+    {{
+      "continuity_notes": [
+        {{
+          "item_name": "Noun from script",
+          "resolved_specificity": "N/A",
+          "note": "State change or production instruction"
         }}
       ]
     }}

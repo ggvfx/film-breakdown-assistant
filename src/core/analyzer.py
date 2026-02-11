@@ -17,7 +17,7 @@ from src.ai.harvester import get_core_prompt, get_set_prompt, get_action_prompt,
 from src.core.models import PASS_1_CATEGORIES, PASS_2_CATEGORIES, PASS_3_CATEGORIES, PASS_4_CATEGORIES
 
 # Agentic passes
-from src.ai.continuity_agent import get_continuity_prompt
+from src.ai.continuity_agent import get_matchmaker_prompt, get_observer_prompt
 
 
 class ScriptAnalyzer:
@@ -164,22 +164,22 @@ class ScriptAnalyzer:
         
 
     async def run_continuity_pass(self, scene_data: dict, history_summary: str) -> str:
-        prompt = get_continuity_prompt(
-            current_scene_text=scene_data.get('raw_text', ""),
-            current_scene_num=scene_data.get('scene_number', "0"),
-            history_summary=history_summary
+        
+        # 1. Call both specialized prompts
+        res_a = await self.client.generate_breakdown(
+            get_matchmaker_prompt(scene_data.get('raw_text', ""), scene_data.get('scene_number', "0"), history_summary)
+        )
+        res_b = await self.client.generate_breakdown(
+            get_observer_prompt(scene_data.get('raw_text', ""), scene_data.get('scene_number', "0"))
         )
         
-        response = await self.client.generate_breakdown(prompt)
-        if not response:
-            return ""
-
-        # Use .get() but provide fallbacks for common model 'drifts'
-        notes = response.get('continuity_notes') or response.get('continuity') or []
+        # 2. Extract and combine the lists
+        notes_a = res_a.get('continuity_notes') if res_a else []
+        notes_b = res_b.get('continuity_notes') if res_b else []
         
-        # If the AI returns a dict instead of a list (as seen in your debug logs)
-        if isinstance(notes, dict):
-            notes = notes.get('checks') or notes.get('notes') or []
+        # This creates one master list for your existing loop to process
+        notes = (notes_a if isinstance(notes_a, list) else []) + \
+                (notes_b if isinstance(notes_b, list) else [])
 
         if not notes:
             return ""
