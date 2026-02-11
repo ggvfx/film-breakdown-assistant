@@ -177,7 +177,13 @@ def get_action_prompt(
     --- 1. CATEGORY REFERENCE (FOR DEFINITION ONLY) ---
     {categories_str}
         - Props: Handheld objects handled by cast.
-		- Special Effects: Physical on-set events like SPARKS, SMOKE, or BREAKING GLASS. If something physical happens (like an explosion or sparking), it MUST be here.
+        - Special Effects: Extract items only when physical requirements are present. 
+            *If the text says "BOOM" or "BANG," extract "EXPLOSION". 
+            *If bullets "PING" or "WHIZ," extract "BULLET HITS". 
+            *If the ground is "RAIN-SLICKED" or "WET," extract "WET DOWN". 
+            *Always extract "FIRE," "SMOKE," "SNOW," or "FOG" if mentioned. 
+            *If the script says "SHATTER" or "SMASH," extract "BREAKING GLASS". 
+            *Do not list these triggers if they are not in the script.
         - Wardrobe: Specific clothing mentioned that isn't standard.
         - Makeup/Hair: Prosthetics, wounds, or specific styles.
         - Animals: Any living creature. Requires 'Animal Wrangler' as implied.
@@ -189,7 +195,7 @@ def get_action_prompt(
     {logic_rules}
         - ELEMENT SEARCH: Scan Action AND Dialogue for every production item. Be skeptical. Only extract an item if it is a specific requirement. Avoid "Atmosphere" or "General Vibe" items unless they are physical production requirements.
         - NAME FORMAT: Use UPPERCASE for names. Strip all counts from the name string. (Correct: "BYSTANDERS").
-        - SPECIAL EFFECTS: If the script says "sparking," "smoke," or "shatter," you MUST extract an item (e.g., "SPARKS"). NEVER leave this empty if a physical effect is described.
+        - SPECIAL EFFECTS: Extract an element for any "TRIGGER" or "ELEMENTAL" word found. Do not interpret these as sounds; they are physical requirements for the set.
         - NO INFERENCE: Only extract items explicitly named. Do not assume items exist just because of the location.
         - ZERO-FILL: If a category is empty, return []. NEVER use "null", "none", or "N/A".
         - COUNT LOGIC: If a quantity is mentioned, include it in parentheses in the name field, e.g., "ITEM NAME (6)". For single items, just provide the name.
