@@ -28,13 +28,11 @@ def get_matchmaker_prompt(current_scene_text: str, current_scene_num: str, histo
     {current_scene_text}
 
     --- MANDATORY LOGIC ---
-    1. SPECIFICITY LOOKUP: Identify generic nouns in the CURRENT SCRIPT. Look for a match in the REFERENCE CATALOG. 
-       - If Script says "The [Generic Item]" and Catalog has a "[Specific Version]", map them.
-    2. ZERO HALLUCINATION RULE: 
-       - Do NOT use items from the prompt examples. 
-       - Do NOT use items from the catalog unless they are the SAME OBJECT as the script noun.
-       - If no match exists, return "continuity_notes": [].
-    3. IGNORE CHARACTERS: Do not map people (George, Mary, etc).
+    1. UNIVERSAL SPECIFICITY: Check the current script for generic nouns. If an item exists in the REFERENCE CATALOG with more detail, create a note to use the specific version.
+    2. GAP FILLING: If an item from the CATALOG is logically present in this scene but was missed by the harvester, list it here.
+    3. THE "NO-PEOPLE" RULE: Strictly ignore all Characters/People (e.g., Jax, Mira). Do not map or track them.
+    4. SCOPE: Apply this to all physical production categories in the Catalog (Props, Vehicles, Wardrobe, SFX, etc.).
+    5. NO REASONING: Do not explain your logic. Return only the JSON.
 
     --- OUTPUT FORMAT ---
     Return ONLY valid JSON:
@@ -49,6 +47,7 @@ def get_matchmaker_prompt(current_scene_text: str, current_scene_num: str, histo
     }}
     """
 
+
 def get_observer_prompt(current_scene_text: str, current_scene_num: str) -> str:
     return f"""
     TASK: Script Supervisor Observer - Scene {current_scene_num}
@@ -57,11 +56,10 @@ def get_observer_prompt(current_scene_text: str, current_scene_num: str) -> str:
     {current_scene_text}
 
     --- MANDATORY LOGIC ---
-    1. STATE CHANGES: If an item in the script is damaged or altered, record its NEW CONDITION in the 'note' field.
-    2. ZERO HALLUCINATION RULE: 
-       - Do NOT use items from the prompt examples. 
-       - Do NOT use items from the catalog unless they are the SAME OBJECT as the script noun.
-       - If no match exists, return "continuity_notes": [].
+    1. PHYSICAL STATE CHANGES: Record only if an item becomes: Broken, Shattered, Bloody, Burned, or Wetted.
+    2. NO CHARACTER ACTIONS: Do not record "Character runs" or "Character jumps." Only record the status of the OBJECT.
+    3. THE "NO-PEOPLE" RULE: Strictly ignore all Characters/People.
+    4. ZERO HALLUCINATION: If no physical change occurs, return an empty list.
 
     --- OUTPUT FORMAT ---
     Return ONLY valid JSON:
