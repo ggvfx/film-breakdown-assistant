@@ -1,70 +1,45 @@
 """
-Global Configuration and User Settings.
+Global Configuration Management.
 
-This module defines the ProjectConfig dataclass which stores user-adjustable 
-parameters for LLM interaction, extraction depth, performance modes, and 
-Movie Magic Scheduling category defaults.
+Handles user preferences, LLM parameters, and safety triggers.
+Designed to be serializable for GUI state persistence.
 """
 
-from dataclasses import dataclass, field
 from typing import List, Optional, Dict
+from pydantic import BaseModel, Field
 from src.core.models import MMS_CATEGORIES
 
-
-@dataclass
-class ProjectConfig:
+class ProjectConfig(BaseModel):
     """
-    Stores all user-adjustable settings for the breakdown process.
+    Application-wide settings and user preferences.
+    Using BaseModel ensures type safety and easy JSON export/import.
     """
+    
     # Path Persistence
-    last_directory: str = ""  # Stores the FOLDER path of the last script used
-
-    # Final Draft (.fdx) Integration
-    import_fdx_tags: bool = False  # If True, scrapes existing breakdown tags
-    import_fdx_notes: bool = False # If True, pulls script notes into the breakdown
-
+    last_directory: str = ""
+    output_dir: str = "outputs"
+    
     # LLM Settings
     ollama_model: str = "llama3.1:8b"
-    temperature: float = 0.1  # Low temperature ensures factual extraction
+    temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     
     # Extraction Logic
     conservative_mode: bool = True
-    extract_implied_elements: bool = False  # Determines if AI infers non-stated items
+    extract_implied_elements: bool = False
     
-    # Performance Settings
-    # Eco Mode: 1 worker thread. Power Mode: >1 worker threads.
+    # Performance & Concurrency
     eco_mode: bool = True
-    worker_threads: int = 1 
+    worker_threads: int = Field(default=1, ge=1, le=8)
     
-    # Range Selection Settings
-    # range_mode options: "All", "Scene", "Page"
-    range_mode: str = "All"
-    range_start: Optional[int] = None
-    range_end: Optional[int] = None
+    # Movie Magic Setup
+    mms_categories: List[str] = Field(default_factory=lambda: list(MMS_CATEGORIES))
+    category_selection: Dict[str, bool] = Field(
+        default_factory=lambda: {cat: True for cat in MMS_CATEGORIES}
+    )
     
-    # UI & Workspace
-    last_open_directory: str = ""
-    auto_save_enabled: bool = True
-    
-    # Movie Magic Defaults
-    mms_categories: List[str] = field(default_factory=lambda: [
-        "Cast Members", "Background Actors", "Stunts", "Vehicles", "Props",
-        "Camera", "Special Effects", "Wardrobe", "Makeup/Hair", "Animals",
-        "Animal Wrangler", "Music", "Sound", "Art Department", "Set Dressing",
-        "Greenery", "Special Equipment", "Security", "Additional Labor",
-        "Visual Effects", "Mechanical Effects", "Miscellaneous", "Notes"
-    ])
-
-    category_selection: Dict[str, bool] = field(default_factory=lambda: {
-        cat: True for cat in MMS_CATEGORIES
-    })
-
-    # Path Settings
-    output_dir: str = "outputs"
-    test_dir: str = "tests"
-    
-    # Safety & Logistics Triggers (From Master Brief)
-    safety_triggers: dict = field(default_factory=lambda: {
+    # Safety & Logistics Triggers
+    # Keywords that trigger the 'Flag Agent' to alert the AD
+    safety_triggers: Dict[str, List[str]] = Field(default_factory=lambda: {
         "Regulatory": ["Minor", "Child", "8 years old", "Baby"],
         "Sensitive": ["Intimacy", "Nudity", "Kiss", "Sexual"],
         "Stunts": ["Fall", "Crash", "Fight", "Explosion", "Fire", "Flame"],
@@ -73,18 +48,18 @@ class ProjectConfig:
         "Equipment": ["Crane", "Underwater", "Aerial", "Drone"]
     })
 
-    # Agentic Workflow Settings
+    # Agentic Workflow Toggles
     use_continuity_agent: bool = True
     use_flag_agent: bool = True
-
-    # Auto Save Settings
-    auto_save_enabled: bool = True # Toggle for background saving
-
+    
     # Export Settings
-    export_excel: bool = True     # Toggle for Excel files
-    export_csv: bool = True      # Toggle for CSV files
-    export_mms: bool = True     # Toggle for Movie Magic scheduling xml files
+    export_excel: bool = True
+    export_csv: bool = True
+    export_mms: bool = True
+    
+    # GUI State
+    auto_save_enabled: bool = True
 
-# --- APP-WIDE DEFAULTS ---
-# Initialized instance of the config used as the application's base state.
+# --- GLOBAL INSTANCE ---
+# This serves as the 'Live' config the app refers to.
 DEFAULT_CONFIG = ProjectConfig()

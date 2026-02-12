@@ -1,6 +1,8 @@
 """
 AI Harvester Templates for Script Analysis.
-Split into Core (Pass 1), Set (Pass 2), Action (Pass 3), Gear (Pass 4) for maximum accuracy.
+
+Defines the multi-pass prompt engineering required to extract Movie Magic elements.
+Separated into Core, Set, Action, and Gear passes for maximum extraction accuracy.
 """
 
 from typing import List
@@ -14,6 +16,7 @@ You prioritize technical precision over creative writing.
 You MUST output ONLY valid JSON.
 """
 
+# --- PASS 1: CORE NARRATIVE ---
 def get_core_prompt(
     scene_text: str, 
     scene_num: str,
@@ -87,6 +90,7 @@ def get_core_prompt(
     {scene_text}
     """
 
+# --- PASS 2: PHYSICAL SET ---
 def get_set_prompt(
     scene_text: str, 
     scene_num: str,
@@ -148,6 +152,7 @@ def get_set_prompt(
     {scene_text}
     """
 
+# --- PASS 3: ACTION REQUIREMENTS ---
 def get_action_prompt(
     scene_text: str, 
     scene_num: str,

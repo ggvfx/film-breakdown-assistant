@@ -1,16 +1,19 @@
 # --- CORE FRAMEWORK ---
-PySide6          # UI Framework for the desktop interface
-pydantic         # Data models and validation (The "Source of Truth")
+PySide6>=6.5.0       # UI Framework
+pydantic>=2.0.0      # Data models (v2 is required for .model_dump in utils.py)
+typing-extensions    # Backwards compatibility for type hints
 
 # --- AI & LLM ---
-ollama           # Official Python client for local Llama 3.2
-aiohttp          # Required for asynchronous network calls to Ollama
+ollama               # Local LLM communication
+aiohttp              # Async communication for GUI responsiveness
+python-dotenv        # Environment/Settings management
 
 # --- DOCUMENT PARSING ---
-pdfplumber       # High-accuracy PDF text extraction (preserves layout)
-python-docx      # For reading .docx script files
-striprtf         # Essential for cleaning .rtf script files
+pdfplumber           # PDF layout extraction
+python-docx          # Word doc extraction
+striprtf             # RTF cleaning
 
 # --- DATA & EXPORTS ---
-pandas           # Data manipulation for Excel/CSV formatting
-openpyxl         # Engine required by Pandas to write .xlsx files
+pandas               # CSV/Excel logic
+openpyxl             # Excel engine
+lxml                 # Advanced XML for Movie Magic (.sex) export

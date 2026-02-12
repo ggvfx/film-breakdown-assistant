@@ -1,11 +1,23 @@
 """
-flag_agent.py
--------------
-Role: Production Safety & Risk Assessment for Llama 3.1 8B
+Flag Agent (Production Safety & Risk Assessment).
+
+Scans scene text and harvested elements for production risks, 
+regulatory requirements, and high-cost logistics.
 """
-# No need to redefine ReviewFlag here, we use the central one from models.py
+
+from typing import List
+from src.core.models import ReviewFlag
 
 def get_flag_prompt(scene_text: str, elements_summary: str, scene_num: str) -> str:
+    """
+    Generates the safety and risk assessment prompt.
+    
+    Args:
+        scene_text: The raw text of the scene.
+        elements_summary: A formatted string of already harvested elements.
+        scene_num: The current scene number.
+    """
+
     return f"""
     TASK: Production Safety & Risk Scan - Scene {scene_num}
     
@@ -49,3 +61,7 @@ def get_flag_prompt(scene_text: str, elements_summary: str, scene_num: str) -> s
     }}
     If no flags are found, return {{"review_flags": []}}.
     """
+
+def process_results(data: dict) -> List[ReviewFlag]: 
+    # For possible processing of results in future, as needed.
+    pass

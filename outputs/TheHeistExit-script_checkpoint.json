@@ -1,0 +1,364 @@
+[
+    {
+        "scene_number": "1",
+        "int_ext": "INT",
+        "set_name": "BANK VAULT",
+        "day_night": "NIGHT",
+        "scene_index": 1,
+        "pages_whole": 0,
+        "pages_eighths": 4,
+        "script_text": "The air is thick with the smell of ozone. LASER GRIDS\u2014                 \n             vibrant, humming webs of red light\u2014crisscross the room,                \n             shorted out by a bypass module sparking on the floor.                  \n                                                                                    \n                                                                                    \n             JAX (32) and MIRA (28) are waist-deep in chaos. STACKS OF              \n             CASH are piled high. Six heavy DUFFEL BAGS sit engorged.               \n                                                                                    \n             Jax cinches the last bag shut. He checks his watch.                    \n                                                                                    \n                       JAX                                                          \n                 Time\u2019s up. The silent alarm just                                   \n                 pinged the precinct.                                               \n                                                                                    \n                                                                                    \n                       MIRA                                                         \n                 Five seconds. I\u2019m wiping the                                       \n                 internal loop.                                                     \n                                                                                    \n             She rips a cable out. The vault door groans.                           \n                                                                                    \n                       JAX                                                          \n                                                                                    \n                 Move. Now.                                                         \n                                                                                    \n             Jax swings two bags over his shoulders. They bolt.",
+        "synopsis": "Vault Heist Underway",
+        "description": "Jax and Mira are in a bank vault, surrounded by laser grids and stacks of cash. They must escape before the silent alarm is triggered.",
+        "elements": [
+            {
+                "name": "LASER GRIDS",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(multiple)"
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(multiple)"
+            },
+            {
+                "name": "DUFFEL BAGS (6)",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(6)"
+            },
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MIRA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "LASER GRIDS",
+                "category": "Mechanical Effects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "LASER GRIDS",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "LASER GRIDS",
+                "category": "Special Equipment",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Miscellaneous",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "LASER GRIDS -> N/A: \nSTACKS OF CASH -> N/A: \nDUFFEL BAGS -> N/A: Use Scene 1 Duffel Bags\nBYPASS MODULE -> N/A: \nbypass module -> sparkling: sparking on the floor\ncable -> ripped out: Mira rips a cable out\nvault door -> groaning: The vault door groans",
+        "flags": [
+            {
+                "flag_type": "SAFETY",
+                "note": "Text describes physical risks like combat (\"move. Now.\") and specialized movement (vaulting).",
+                "severity": 3
+            }
+        ]
+    },
+    {
+        "scene_number": "2",
+        "int_ext": "INT",
+        "set_name": "BANK LOBBY",
+        "day_night": "NIGHT",
+        "scene_index": 2,
+        "pages_whole": 0,
+        "pages_eighths": 4,
+        "script_text": "The lobby is a cavern of marble and shadow.                            \n                                                                                    \n                                                                                    \n             AT THE TELLER WINDOW                                                   \n                                                                                    \n             Jax vaults over the mahogany counter, sliding across the               \n             polished wood. He drops the bags on the other side.                    \n                                                                                    \n             BY THE FRONT DOOR                                                      \n                                                                                    \n             Mira presses her back against the glass. Outside, blue and             \n                                                                                    \n             red lights pulse against the rain-slicked pavement.                    \n                                                                                    \n                       MIRA                                                         \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                 We have a problem. They beat the                                   \n                 timer.",
+        "synopsis": "Jax vaults over counter",
+        "description": "Jax vaults over mahogany counter, sliding across polished wood.",
+        "elements": [
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BYSTANDERS (0)",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "VAULTING",
+                "category": "Stunts",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MAHOGANY COUNTER",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLISHED WOOD FLOOR",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "MAHOGANY COUNTER",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLISHED WOOD",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "marble -> CATEGORY BACKGROUND ACTORS: DUFFEL BAGS (6): Note: Background Actors could potentially be marble dummies or objects\ncounter -> CATEGORY SET DRESSING: STACKS OF CASH: Use Scene 1 Counter\npolished wood -> CATEGORY BACKGROUND ACTORS: LASER GRIDS (6): Note: Could use laser grid for visual effect or pattern on polished wood\nduffel bags -> CATEGORY PROPS: DUFFEL BAGS (6): Use Scene 1 Duffel Bags\nlaser grids -> CATEGORY SPECIAL EQUIPMENT: LASER GRIDS: Check functionality of laser grid for visual effect or timing purposes\nstacks of cash -> CATEGORY SET DRESSING: STACKS OF CASH: Verify authenticity and condition of stacks of cash\nRain-slicked pavement -> Wetted: The rain has made the pavement wet.\nMahogany counter -> None (no physical change): No change in state",
+        "flags": [
+            {
+                "flag_type": "SAFETY",
+                "note": "Jax vaults over the mahogany counter with a stunt move.",
+                "severity": 3
+            }
+        ]
+    },
+    {
+        "scene_number": "3",
+        "int_ext": "INT",
+        "set_name": "BANK LOBBY",
+        "day_night": "NIGHT",
+        "scene_index": 3,
+        "pages_whole": 0,
+        "pages_eighths": 1,
+        "script_text": "The lobby is bathed in the strobe-light effect of police               \n             cruisers. Jax and Mira crouch behind a marble pillar.                  \n                                                                                    \n                                                                                    \n                       JAX                                                          \n                 On three, we blow the mag-locks.                                   \n                                                                                    \n             Jax clicks a detonator. BOOM. The glass doors SHATTER.",
+        "synopsis": "Police cruisers light up lobby",
+        "description": "Jax and Mira crouch behind a pillar, waiting to blow the mag-locks.",
+        "elements": [
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MIRA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "PILLAR",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "MAG-LOCKS",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "MAG-LOCKS",
+                "category": "Sound",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "police cruisers -> CATEGORY BACKGROUND ACTORS: BYSTANDERS (0): \nmarble pillar -> N/A: Use existing Set Dressing from Reference Catalog\ndetonator -> N/A: Use existing Props from Reference Catalog (if not, list in GAP FILLING)\nglass doors -> SHATTERED: Physical state changed due to detonator explosion",
+        "flags": [
+            {
+                "flag_type": "WEAPONRY",
+                "note": "Explosives used in scene (mag-locks)",
+                "severity": 3
+            },
+            {
+                "flag_type": "SAFETY",
+                "note": "Physical risks like explosive detonation and glass shattering.",
+                "severity": 3
+            }
+        ]
+    },
+    {
+        "scene_number": "4",
+        "int_ext": "EXT",
+        "set_name": "BANK",
+        "day_night": "NIGHT",
+        "scene_index": 4,
+        "pages_whole": 0,
+        "pages_eighths": 4,
+        "script_text": "Glass crunches under boots. TWENTY BYSTANDERS and POLICE               \n             OFFICERS scatter for cover.                                            \n                                                                                    \n             FIVE VEHICLES dominate the street: FOUR POLICE CRUISERS                \n             forming a barricade and a matte-black GETAWAY VAN.                     \n                                                                                    \n                       OFFICER RIVERA                                               \n                                                                                    \n                 DROP THE BAGS! HANDS IN THE AIR!                                   \n                                                                                    \n             Jax hurls a flash-bang. WHITE OUT.                                     \n                                                                                    \n             AT THE GETAWAY VAN                                                     \n                                                                                    \n             The side door slides open. Mira tosses her bags in. Jax                \n             dives in after her as bullets PING off the armor.                      \n                                                                                    \n                                                                                    \n             The van screeches forward, fishtailing into the night.                 \n                                                                                    \n                       JAX                                                          \n                 Told you we\u2019d make the exit.                                       \n                                                                                    \n                              FADE OUT.",
+        "synopsis": "GETAWAY VAN ESCAPE",
+        "description": "Jax and Mira escape in a getaway van, pursued by police.",
+        "elements": [
+            {
+                "name": "TWENTY BYSTANDERS",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(20)"
+            },
+            {
+                "name": "POLICE OFFICERS",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FIVE VEHICLES",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(5)"
+            },
+            {
+                "name": "FOUR POLICE CRUISERS",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(4)"
+            },
+            {
+                "name": "GETAWAY VAN",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "OFFICER RIVERA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MIRA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BULLETS",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FLASH-BANG",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "GETAWAY VAN",
+                "category": "Vehicles",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLICE VEHICLES",
+                "category": "Vehicles",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "GETAWAY VAN",
+                "category": "Special Equipment",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLICE",
+                "category": "Security",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "TWENTY BYSTANDERS -> None (Bystanders not specified in catalog): \nPOLICE OFFICERS -> None (Police Officers not specified in catalog): \nFIVE VEHICLES -> Four Police Cruisers and one Getaway Van (matching category: Vehicles): Use four Police Cruisers from the catalog and add a matte-black Getaway Van to match the description.\nMAHOGANY COUNTER -> Mahogany Counter (matching category: Props/Set Dressing): \nPOLISHED WOOD FLOOR -> Polished Wood Floor (matching category: Set Dressing/Props): \nSTACKS OF CASH -> Stacks of Cash (matching category: Props/Set Dressing/Miscellaneous): \nGlass -> Shattered: Glass crunches under boots.\nPolice Cruisers -> N/A: Four Police Cruisers forming a barricade\nGetaway Van -> Armor scratched or damaged (not explicitly stated, but bullets PING off): The van screeches forward, fishtailing into the night.",
+        "flags": [
+            {
+                "flag_type": "WEAPONRY",
+                "note": "Bullets and flash-bang involved.",
+                "severity": 3
+            },
+            {
+                "flag_type": "SAFETY",
+                "note": "Physical risks like combat, falls (GETAWAY VAN fishtailing), and specialized movement implied.",
+                "severity": 3
+            },
+            {
+                "flag_type": "LOGISTICS",
+                "note": "High-complexity environment with large crowds (TWENTY BYSTANDERS) and significant vehicle coordination (FIVE VEHICLES).",
+                "severity": 1
+            }
+        ]
+    }
+]
