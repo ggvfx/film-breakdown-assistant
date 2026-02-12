@@ -9,58 +9,84 @@ import asyncio
 import logging
 from typing import List, Dict, Any, Optional
 
-# Local modules
 from src.ai.ollama_client import OllamaClient
-# Import the two new pass prompts
 from src.ai.harvester import get_core_prompt, get_set_prompt, get_action_prompt, get_gear_prompt
-# Import the category split lists
-from src.core.models import PASS_1_CATEGORIES, PASS_2_CATEGORIES, PASS_3_CATEGORIES, PASS_4_CATEGORIES
-
-# Agentic passes
 from src.ai.continuity_agent import get_matchmaker_prompt, get_observer_prompt
-
+from src.ai.flag_agent import get_flag_prompt
+from src.core.models import (
+    PASS_1_CATEGORIES, PASS_2_CATEGORIES, PASS_3_CATEGORIES, PASS_4_CATEGORIES,
+    ReviewFlag
+)
 
 class ScriptAnalyzer:
-    """
-    Manages the batch processing of scenes through the AI.
-    """
-
     def __init__(self, client: OllamaClient, config):
         self.client = client
-        self.config = config 
-        self.semaphore = asyncio.Semaphore(config.worker_threads) 
+        self.config = config
+        self.semaphore = asyncio.Semaphore(config.worker_threads)
+        self.master_history = {}
         self.is_running = True
 
-    async def run_breakdown(
+    async def run_full_pipeline(
         self, 
         scenes: List[Dict[str, Any]], 
-        selected_categories: List[str],
+        categories: List[str],
         from_scene: Optional[str] = None,
         to_scene: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """
-        Processes a list of scenes, respecting the selected range and Eco/Power mode.
-        """
-        # 1. Filter scenes by range ('Mapping' logic)
-        target_scenes = self._filter_scenes(scenes, from_scene, to_scene)
-
-        # If the user provided a range that found nothing, we stop early
-        if not target_scenes:
-            logging.warning("No scenes found in the selected range.")
-            return []
+        """The main entry point: Filters, then processes scenes through the pipeline."""
         
-        # 2. Create a list of 'Tasks' for the AI
+        # 1. APPLY FILTERING
+        active_scenes = self._filter_scenes(scenes, from_scene, to_scene)
+        
+        processed_scenes = []
+        total = len(active_scenes)
+        
+        for i, scene in enumerate(active_scenes, 1):
+            scene_num = scene.get('scene_number', '??')
+            print(f"\n>>> [Scene {i}/{total}] Processing Scene {scene_num}...")
+            
+            # 2. Harvest
+            print(f"    - Harvesting elements...")
+            harvest_results = await self.run_breakdown([scene], categories)
+            current_scene_data = harvest_results[0]
+                
+            # 3. Continuity
+            if self.config.use_continuity_agent:
+                print(f"    - Running Continuity...")
+                history_str = self._get_history_summary()
+                notes = await self.run_continuity_pass(current_scene_data, history_str)
+                current_scene_data['continuity_notes'] = notes
+                
+            # 4. History Update (Silent)
+            self._update_history(current_scene_data.get('elements', []))
+
+            # 5. Flags
+            if self.config.use_flag_agent:
+                print(f"    - Scanning for Safety & Risk Flags...")
+                elements_list = current_scene_data.get('elements', [])
+                flags = await self.run_flag_pass(current_scene_data['raw_text'], elements_list, scene_num)
+                current_scene_data['review_flags'] = flags
+                print(f"      Found {len(flags)} review flags.")
+                
+            processed_scenes.append(current_scene_data)
+        
+        return processed_scenes
+    
+    async def run_breakdown(
+        self, 
+        scenes: List[Dict[str, Any]], 
+        selected_categories: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Coordinates the harvesting of elements for the provided scenes.
+        """
         tasks = [
             self._process_single_scene(scene, selected_categories) 
-            for scene in target_scenes
+            for scene in scenes
         ]
-        
-        # 3. Execute all tasks and wait for results
-        # 'gather' runs them concurrently up to the semaphore limit
         results = await asyncio.gather(*tasks)
-        
-        # Filter out any 'None' results from failed AI calls
         return [r for r in results if r is not None]
+
 
     async def _process_single_scene(self, scene: Dict[str, Any], categories: List[str]):
         """
@@ -69,6 +95,9 @@ class ScriptAnalyzer:
         async with self.semaphore:
             if not self.is_running:
                 return None
+
+            # ADDED: Define scene number for the print statements below
+            s_num = scene.get("scene_number", "??")
 
             # --- 1. PREP SETTINGS & CATEGORIES ---
             llm_options = {"temperature": self.config.temperature}
@@ -91,6 +120,8 @@ class ScriptAnalyzer:
 
             # --- 2. EXECUTE PASSES ---
             # Pass 1: Core Narrative & People
+            print(f"      [Sc {s_num}] Pass 1/4: Core Narrative & Cast...")
+
             core_prompt = get_core_prompt(
                 scene_text=scene["raw_text"],
                 scene_num=scene["scene_number"],
@@ -106,6 +137,7 @@ class ScriptAnalyzer:
             # Pass 2: Set (Vehicles, Art Dept, Greenery, etc.)
             set_result = {"elements": []}
             if active_p2:
+                print(f"      [Sc {s_num}] Pass 2/4: Set & Vehicles...")
                 set_prompt = get_set_prompt(
                     scene_text=scene["raw_text"],
                     scene_num=scene["scene_number"],
@@ -118,6 +150,7 @@ class ScriptAnalyzer:
             # Pass 3: Action (Props, SFX, Labor, etc.)
             action_result = {"elements": []}
             if active_p3:
+                print(f"      [Sc {s_num}] Pass 3/4: Props & SFX...")
                 action_prompt = get_action_prompt(
                     scene_text=scene["raw_text"],
                     scene_num=scene["scene_number"],
@@ -130,6 +163,7 @@ class ScriptAnalyzer:
             # Pass 4: Gear (Camera, Sound, Gear, Misc)
             gear_result = {"elements": []}
             if active_p4:
+                print(f"      [Sc {s_num}] Pass 4/4: Technical Gear & Misc...")
                 gear_prompt = get_gear_prompt(
                     scene_text=scene["raw_text"],
                     scene_num=scene["scene_number"],
@@ -196,8 +230,41 @@ class ScriptAnalyzer:
                 formatted.append(n)
 
         return "\n".join(formatted)
+    
+    async def run_flag_pass(self, scene_text: str, elements: List[Dict[str, Any]], scene_num: str) -> List[ReviewFlag]:
+        """Final safety pass using the 8B model logic."""
+        formatted_elements = "\n".join([f"- {e['category']}: {e['name']}" for e in elements])
+        prompt = get_flag_prompt(scene_text, formatted_elements, scene_num)
+        
+        response = await self.client.generate_breakdown(prompt)
+        flags = []
+        for f in response.get("review_flags", []):
+            try:
+                flags.append(ReviewFlag(
+                    flag_type=f.get("flag_type", "GENERAL"),
+                    note=f.get("note", ""),
+                    severity=int(f.get("severity", 1))
+                ))
+            except Exception as e:
+                logging.warning(f"Flag Parse Error: {e}")
+        return flags
 
+    def _update_history(self, elements: List[Dict[str, Any]]):
+        """Internal helper to keep the 8B model's reference catalog updated."""
+        for el in elements:
+            cat = el['category'].upper()
+            name = el['name'].upper()
+            if cat not in self.master_history:
+                self.master_history[cat] = set()
+            self.master_history[cat].add(name)
 
+    def _get_history_summary(self) -> str:
+        """Formats the master history for the Matchmaker prompt."""
+        lines = []
+        for cat, items in self.master_history.items():
+            lines.append(f"CATEGORY {cat}: {', '.join(sorted(list(items)))}")
+        return "\n".join(lines) if lines else "CATALOG EMPTY."
+    
     def _filter_scenes(self, scenes, start_num, end_num):
         """Filters the master list based on scene IDs like '15A'."""
         if not start_num and not end_num:

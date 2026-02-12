@@ -6,6 +6,7 @@ from src.core.analyzer import ScriptAnalyzer
 from src.core.exporter import DataExporter
 from src.ai.ollama_client import OllamaClient
 from src.core.config import DEFAULT_CONFIG
+from src.core.models import MMS_CATEGORIES
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -39,50 +40,11 @@ async def main():
     scenes = parser.split_into_scenes(raw_text)
     logging.info(f"Found {len(scenes)} scenes.")
 
-    # --- 3. ANALYZE (The AI Part) ---
-    logging.info(f"Step 2: Sending {len(scenes)} scenes to AI (Ollama)...")
+    # --- 3. ANALYSIS & PROCESSING ---
+    logging.info("Step 2: Running Unified Pipeline (Harvester -> Continuity -> Flags)...")
     
-    selected_categories = DEFAULT_CONFIG.mms_categories
-    
-    # We use from_scene="1" and to_scene="4" to match your 4 parsed scenes
-    analyzed_scenes = await analyzer.run_breakdown(
-        scenes=scenes,
-        selected_categories=selected_categories,
-        from_scene=None,
-        to_scene=None
-    )
-
-    # CLI Progress: This confirms each scene processed with its unique name
-    for scene in analyzed_scenes:
-        logging.info(f"DONE: Scene {scene.get('scene_number')} - {scene.get('set_name')} ({scene.get('day_night')})")
-
-    # --- 3.5 CONTINUITY PASS (Conditional) ---
-    if DEFAULT_CONFIG.use_continuity_agent:
-        logging.info("Step 2.5: Running Script Supervisor check...")
-        master_history_dict = {}
-
-        for scene in analyzed_scenes:
-            # 1. Format history as a clean "Catalog"
-            history_lines = []
-            for cat, items in master_history_dict.items():
-                # Sorting items helps the model process them consistently
-                sorted_items = sorted(list(items))
-                history_lines.append(f"CATEGORY {cat}: {', '.join(sorted_items)}")
-            
-            history_str = "\n".join(history_lines) if history_lines else "CATALOG EMPTY."
-            
-            # 2. Run continuity
-            notes = await analyzer.run_continuity_pass(scene, history_str)
-            scene['continuity_notes'] = notes
-            
-            # 3. Update history (Keep it categorized)
-            for el in scene.get('elements', []):
-                if isinstance(el, dict) and el.get('name') and el.get('category'):
-                    cat = el['category'].upper()
-                    name = el['name'].upper()
-                    if cat not in master_history_dict:
-                        master_history_dict[cat] = set()
-                    master_history_dict[cat].add(name)
+    # This now handles everything internally and provides its own logs
+    analyzed_scenes = await analyzer.run_full_pipeline(scenes, MMS_CATEGORIES)
 
     # --- 4. EXPORT ---
     logging.info("Step 3: Generating Excel validation sheet...")

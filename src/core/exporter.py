@@ -71,17 +71,14 @@ class DataExporter:
             # 2.5 Add Continuity Notes AFTER departments
             row["Continuity Notes"] = scene.get("continuity_notes", "")
 
-            # 3. Add Review Flags
+            # 3. Handle Review Flags
             formatted_flags = []
-            for f in scene.get('flags', []):
-                if isinstance(f, dict):
-                    f_type = f.get('flag_type', 'ALERT')
-                    f_note = f.get('note', 'Review required')
-                    f_sev = f.get('severity', 1)
-                    formatted_flags.append(f"[{f_type}] {f_note} (Sev: {f_sev})")
-                else:
-                    # Fallback if AI returned a string instead of a dict
-                    formatted_flags.append(f"[ALERT] {str(f)} (Sev: 1)")
+            for f in scene.get("review_flags", []):
+                # Since these are now ReviewFlag objects or dicts from models.py
+                if hasattr(f, 'flag_type'): # It's a Pydantic object
+                    formatted_flags.append(f"[{f.flag_type}] {f.note} (Sev: {f.severity})")
+                elif isinstance(f, dict): # It's a dict
+                    formatted_flags.append(f"[{f.get('flag_type')}] {f.get('note')} (Sev: {f.get('severity')})")
             
             row["Review Flags"] = "\n".join(formatted_flags)
 

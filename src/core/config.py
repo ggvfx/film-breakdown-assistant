@@ -66,8 +66,8 @@ class ProjectConfig:
     })
 
     # Agentic Workflow Settings
-    #use_supervisor_agent: bool = False  # Default to False for speed/cost
     use_continuity_agent: bool = True
+    use_flag_agent: bool = True
 
 # --- APP-WIDE DEFAULTS ---
 # Initialized instance of the config used as the application's base state.

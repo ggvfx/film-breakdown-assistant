@@ -28,11 +28,12 @@ def get_matchmaker_prompt(current_scene_text: str, current_scene_num: str, histo
     {current_scene_text}
 
     --- MANDATORY LOGIC ---
-    1. UNIVERSAL SPECIFICITY: Check the current script for generic nouns. If an item exists in the REFERENCE CATALOG with more detail, create a note to use the specific version.
-    2. GAP FILLING: If an item from the CATALOG is logically present in this scene but was missed by the harvester, list it here.
-    3. THE "NO-PEOPLE" RULE: Strictly ignore all Characters/People (e.g., Jax, Mira). Do not map or track them.
-    4. SCOPE: Apply this to all physical production categories in the Catalog (Props, Vehicles, Wardrobe, SFX, etc.).
-    5. NO REASONING: Do not explain your logic. Return only the JSON.
+    1. UNIVERSAL SPECIFICITY: Check for generic nouns. If an item exists in the REFERENCE CATALOG with more detail, create a note. 
+    2. STRICT MATCHING: Only map items if they are the same type of object (e.g., "The bag" -> "Duffel Bag"). NEVER match unrelated items (e.g., do NOT map a "Pillar" to a "Counter").
+    3. GAP FILLING: If an item from the CATALOG is logically present in this scene but was missed by the harvester, list it here.
+    4. THE "NO-PEOPLE" RULE: Strictly ignore all Characters/People (e.g., Jax, Mira). Do not map or track them.
+    5. SCOPE: Apply this to all physical production categories in the Catalog (Props, Vehicles, Wardrobe, SFX, etc.).
+    6. NO REASONING/ADVICE: Do not explain your logic or provide production advice. Keep notes short and technical (e.g., "Use Scene 1 Duffel Bags").
 
     --- OUTPUT FORMAT ---
     Return ONLY valid JSON:
