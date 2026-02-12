@@ -9,7 +9,7 @@ The core logic is currently functional via CLI, utilizing Pydantic for data vali
 **Next Milestone:** Implementing .sex (Scheduling Export) support to enable direct, one-click ingestion into Movie Magic Scheduling, eliminating the need for manual data re-entry.
 
 ## Strategic Roadmap
-* **Phase 1 (Current):** Refine CLI-based parsing for .fdx and .pdf; optimize Llama 3.2 prompt strategies for "Conservative Extraction" of safety and regulatory flags; implement Supervisor Agent v1 for element reconciliation and continuity auditing.
+* **Phase 1 (Current):** Refine CLI-based parsing for .fdx and .pdf; optimize Llama 3.1 8B prompt strategies for "Intent-Based" safety and regulatory flagging; implement Continuity & Review Flag Agents for element reconciliation and production risk auditing.
 * **Phase 2 (Immediate):** Develop the .sex export module; integrate AD Alert custom categories for Movie Magic Scheduling.
 * **Phase 3 (Q1 2026):** Transition to a PySide6 (Qt) interface for professional session management and local database persistence.
 
@@ -23,7 +23,7 @@ The tool follows a **"Security-First"** and **"Human-in-the-Loop"** philosophy:
 ## 🛠️ Key Features
 
 * **Intelligence-Driven Script Parsing:** Extracts industry-standard metadata, including slugline parsing (INT/EXT, Location, Time of Day), page count duration in 1/8ths, and automated 6-word scene synopses.
-* **Agentic Continuity Audit:** Goes beyond scene-by-scene analysis using a secondary Supervisor Agent pass. This reasoning layer ensures story-wide consistency, reconciling generic terms (e.g., "Car") with established specifics (e.g., "1967 MUSTANG") and tracking physical states like wounds or wardrobe changes across continuous scenes.
+* **Agentic Continuity Audit:** Goes beyond scene-by-scene analysis using a specialized Continuity Agent. This reasoning layer maintains a "Master History" of the script, reconciling generic terms (e.g., "Car") with established specifics (e.g., "1967 MUSTANG") and tracking physical states like wounds or wardrobe changes across continuous scenes.
 * **Security-First Local Processing:** Utilizes **Ollama** (Llama 3.2) for 100% offline AI analysis, ensuring sensitive, unreleased intellectual property never leaves the local machine.
 * **Comprehensive Element Extraction:** Leverages LLM analysis to identify and categorize 15+ production departments, from Cast and Background counts to Props, Vehicles, and VFX requirements.
 * **Automated Risk & Safety Flagging:** Scans for high-priority production concerns, including regulatory labor (minors), stunts, intimacy, weaponry, and high-cost logistics (animals/cranes).
@@ -32,21 +32,21 @@ The tool follows a **"Security-First"** and **"Human-in-the-Loop"** philosophy:
 * **Industry Standard Interoperability:** Engineered for direct integration into the production ecosystem with planned **.sex (Scheduling Export)** support for **Movie Magic Scheduling** alongside Excel/CSV output.
 * **Session & State Management:** Includes robust "Save/Load" functionality via local JSON checkpoints, allowing production staff to review, edit, and resume breakdowns without data loss.
 
-## 🧠 Advanced Workflows: The Supervisor Agent
-Unlike standard extractors that treat scenes in isolation, this tool utilizes an Agentic Reasoning Loop. Once the initial extraction is complete, a dedicated Supervisor Agent performs a panoramic audit of the entire script:
-* **Global World State:** The agent compiles a "Global Context" of all named characters, unique vehicles, and key props to prevent "data drift."
-* **Implicit Element Discovery:** Scans character dialogue for props mentioned but not explicitly described in action lines.
-* **Continuity Intelligence:** Recognizes CONTINUOUS and SAME time-of-day markers to ensure that character makeup (wounds/aging) and wardrobe conditions persist logically between scenes.
-* **AD Alerts (Custom Category):** Automatically generates high-priority production alerts for safety and regulatory concerns, ready for dedicated ingestion into scheduling software.
+## 🧠 Advanced Workflows: Multi-Agent Pipeline
+The tool utilizes a coordinated Multi-Agent Pipeline that builds a persistent memory of the script as it processes, moving beyond isolated scene extraction:
+* **The Harvester (4-Pass Extraction):** Performs a deep-dive departmental analysis (Core, Set, Action, Gear) to identify 15+ production categories.
+* **Continuity Agent (Memory & Matching)** Utilizes a "Matchmaker" and "Observer" logic. It references a growing Master History of all named characters, unique vehicles, and props to prevent "data drift" and ensure character states (like injuries or wardrobe conditions) persist logically between scenes.
+* **Review Flag Agent (Safety & Risk):** A dedicated inspector that performs an intent-based scan for high-priority concerns including stunts, intimacy, weaponry, and regulatory requirements (minors). It automatically generates AD Alerts with severity ratings (1-3) for direct oversight.
+* **Implicit Element Discovery:** Scans character dialogue for props or requirements mentioned but not explicitly described in scene action lines.
 
 ## 🛠️ Technical Stack
 * **Language:** Python 3.11+
 * **UI:** PySide6 (Qt)
-* **Intelligence:** Ollama (Llama 3.2 3B)
+* **Intelligence:** Ollama (Llama 3.1 8B / Llama 3.2 3B)
 * **Data Handling:** Pydantic, Pandas
 
 ## 📂 Project Structure
-* `src/core/`: Parsing, logic, data models and supervisor agent.
-* `src/ai/`: Ollama integration and prompt engineering.
+* `src/core/`: Parsing, logic and data models.
+* `src/ai/`: Ollama integration, harvester and ai agents; continuity and review flag.
 * `src/ui/`: PySide6 interface components.
 
