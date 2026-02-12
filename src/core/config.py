@@ -16,6 +16,13 @@ class ProjectConfig:
     """
     Stores all user-adjustable settings for the breakdown process.
     """
+    # Path Persistence
+    last_directory: str = ""  # Stores the FOLDER path of the last script used
+    
+    # Final Draft (.fdx) Integration
+    import_fdx_tags: bool = False  # If True, scrapes existing breakdown tags
+    import_fdx_notes: bool = False # If True, pulls script notes into the breakdown
+
     # LLM Settings
     ollama_model: str = "llama3.1:8b"
     temperature: float = 0.1  # Low temperature ensures factual extraction

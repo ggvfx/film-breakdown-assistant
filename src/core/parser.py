@@ -15,6 +15,8 @@ import pdfplumber
 from docx import Document
 from striprtf.striprtf import rtf_to_text
 
+from src.core.config import ProjectConfig
+
 class ScriptParser:
     """
     Handles script extraction and scene mapping for industry-standard formats.
@@ -29,7 +31,7 @@ class ScriptParser:
         self.last_day_night = ""
         self.last_int_ext = ""
 
-    def load_script(self, file_path: str) -> str:
+    def load_script(self, file_path: str, config: ProjectConfig) -> str:
         """Determines file type and routes to the correct extractor."""
         extension = os.path.splitext(file_path)[1].lower()
         
@@ -41,7 +43,7 @@ class ScriptParser:
             elif extension == ".rtf":
                 return self._extract_rtf(file_path)
             elif extension == ".fdx":
-                return self._extract_fdx(file_path)
+                return self._extract_fdx(file_path, import_tags=config.import_fdx_tags)
             elif extension == ".txt":
                 return self._extract_txt(file_path)
             else:
@@ -62,14 +64,25 @@ class ScriptParser:
         doc = Document(path)
         return "\n".join([para.text for para in doc.paragraphs])
 
-    def _extract_fdx(self, path: str) -> str:
+    def _extract_fdx(self, path: str, import_tags: bool = False) -> str:
         """Parses Final Draft XML tags directly for high accuracy."""
         tree = ET.parse(path)
         root = tree.getroot()
         lines = []
         for para in root.findall(".//Paragraph"):
             texts = [t.text for t in para.findall("Text") if t.text]
-            lines.append("".join(texts))
+            combined_text = "".join(texts)
+            
+            # Logic: If tags exist and user wants them, we embed them for the AI
+            if import_tags:
+                # FDX stores tags within the Paragraph or as child nodes
+                tags = para.findall(".//Tag")
+                for tag in tags:
+                    tag_val = tag.get("Value")
+                    if tag_val:
+                        combined_text += f" [[TAG: {tag_val}]]"
+            
+            lines.append(combined_text)
         return "\n".join(lines)
 
     def _extract_rtf(self, path: str) -> str:

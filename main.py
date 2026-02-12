@@ -12,6 +12,7 @@ from src.core.models import MMS_CATEGORIES
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 async def main():
+
     # --- 1. INITIALIZATION ---
     parser = ScriptParser()
     
@@ -24,17 +25,21 @@ async def main():
     exporter = DataExporter()
 
     # --- 2. LOAD & PARSE ---
-    # Ensure this matches the name of the multi-scene script you generated
+    # UPDATE: Set script_path once here. In the UI, this will be the variable from the file selector.
     script_path = "tests/TheHeistExit-script.pdf"
-    #script_path = "tests/TheBrokenWindow - script.docx" 
-    #script_path = "tests/TheDiscovery -script.txt"  
     
     if not os.path.exists(script_path):
-        logging.error(f"File not found: {script_path}. Please check your 'tests' folder.")
+        logging.error(f"File not found: {script_path}. Please check your folder.")
         return
 
+    # UPDATE: Capture directory for config persistence
+    DEFAULT_CONFIG.last_open_directory = os.path.dirname(os.path.abspath(script_path))
+
     logging.info(f"Step 1: Parsing {script_path} into scenes...")
-    raw_text = parser.load_script(script_path)
+    
+    # UPDATE: Pass DEFAULT_CONFIG to enable FDX-specific logic
+    raw_text = parser.load_script(script_path, DEFAULT_CONFIG)
+    
     print(f"DEBUG: Raw text length: {len(raw_text)} characters.")
     print(f"DEBUG: First 500 characters: {raw_text[:500]}")
     scenes = parser.split_into_scenes(raw_text)
@@ -48,7 +53,10 @@ async def main():
 
     # --- 4. EXPORT ---
     logging.info("Step 3: Generating Excel validation sheet...")
-    export_path = "outputs/breakdown_test.xlsx"
+    
+    # UPDATE: Generate dynamic filename based on input script name
+    base_filename = os.path.splitext(os.path.basename(script_path))[0]
+    export_path = os.path.join("outputs", f"{base_filename}_breakdown.xlsx")
     
     # Ensure the output directory exists
     os.makedirs("outputs", exist_ok=True)
