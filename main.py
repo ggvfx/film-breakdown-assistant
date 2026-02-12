@@ -7,6 +7,7 @@ from src.core.exporter import DataExporter
 from src.ai.ollama_client import OllamaClient
 from src.core.config import DEFAULT_CONFIG
 from src.core.models import MMS_CATEGORIES
+from src.core.utils import save_checkpoint
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -51,18 +52,31 @@ async def main():
     # This now handles everything internally and provides its own logs
     analyzed_scenes = await analyzer.run_full_pipeline(scenes, MMS_CATEGORIES)
 
-    # --- 4. EXPORT ---
-    logging.info("Step 3: Generating Excel validation sheet...")
-    
-    # UPDATE: Generate dynamic filename based on input script name
+    # --- 4. DATA PERSISTENCE (AUTO-SAVE) ---
+    if DEFAULT_CONFIG.auto_save_enabled:
+        base_filename = os.path.splitext(os.path.basename(script_path))[0]
+        checkpoint_path = os.path.join("outputs", f"{base_filename}_checkpoint.json")
+        
+        os.makedirs("outputs", exist_ok=True)
+        save_checkpoint(analyzed_scenes, checkpoint_path)
+        logging.info(f"Auto-save: Data saved to {checkpoint_path}")
+
+    # --- 5. EXPORT ---
+    # In the UI, these would be separate calls triggered by an 'Export' button
     base_filename = os.path.splitext(os.path.basename(script_path))[0]
-    export_path = os.path.join("outputs", f"{base_filename}_breakdown.xlsx")
-    
-    # Ensure the output directory exists
     os.makedirs("outputs", exist_ok=True)
-    
-    exporter.export_to_excel(analyzed_scenes, export_path)
-    logging.info(f"DONE! Review your breakdown here: {export_path}")
+
+    if DEFAULT_CONFIG.export_excel:
+        export_path = os.path.join("outputs", f"{base_filename}_breakdown.xlsx")
+        exporter.export_to_excel(analyzed_scenes, export_path)
+        logging.info(f"Exported Excel: {export_path}")
+
+    # placeholders for CSV and MMS
+    if DEFAULT_CONFIG.export_csv:
+        logging.info("CSV Export enabled (Pending Implementation)")
+
+    if DEFAULT_CONFIG.export_mms:
+        logging.info("MMS Export enabled (Pending Implementation)")
 
 if __name__ == "__main__":
     asyncio.run(main())

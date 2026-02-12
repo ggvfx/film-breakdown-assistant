@@ -18,7 +18,7 @@ class ProjectConfig:
     """
     # Path Persistence
     last_directory: str = ""  # Stores the FOLDER path of the last script used
-    
+
     # Final Draft (.fdx) Integration
     import_fdx_tags: bool = False  # If True, scrapes existing breakdown tags
     import_fdx_notes: bool = False # If True, pulls script notes into the breakdown
@@ -75,6 +75,14 @@ class ProjectConfig:
     # Agentic Workflow Settings
     use_continuity_agent: bool = True
     use_flag_agent: bool = True
+
+    # Auto Save Settings
+    auto_save_enabled: bool = True # Toggle for background saving
+
+    # Export Settings
+    export_excel: bool = True     # Toggle for Excel files
+    export_csv: bool = True      # Toggle for CSV files
+    export_mms: bool = True     # Toggle for Movie Magic scheduling xml files
 
 # --- APP-WIDE DEFAULTS ---
 # Initialized instance of the config used as the application's base state.
