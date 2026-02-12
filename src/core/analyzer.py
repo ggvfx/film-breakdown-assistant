@@ -41,6 +41,9 @@ class ScriptAnalyzer:
         Processes the filtered scene list through the multi-pass AI pipeline.
         """
         
+        # --- PERFORMANCE CHECK ---
+        self.semaphore = asyncio.Semaphore(self.config.worker_threads)
+
         # 1. APPLY FILTERING
         active_scenes = self._filter_scenes(scenes, from_scene, to_scene)
         
@@ -71,7 +74,8 @@ class ScriptAnalyzer:
                 current_scene.continuity_notes = notes
                 
             # 4. HISTORY UPDATE
-            self._update_history(current_scene.elements)
+            # Pass the scene_number so the dictionary can store it
+            self._update_history(current_scene.elements, current_scene.scene_number)
 
             # 5. FLAGS
             if self.config.use_flag_agent:
@@ -102,70 +106,75 @@ class ScriptAnalyzer:
         return [r for r in results if r is not None]
 
     async def _process_single_scene(self, scene: Scene, categories: List[str]) -> Optional[Scene]:
-        """Coordinates the 4-Pass breakdown for a single scene."""
+        """Coordinates the 4-Pass breakdown for a single scene using worker threads."""
+        if not self.is_running:
+            return None
+
+        llm_options = {"temperature": self.config.temperature}
+        is_conservative = self.config.conservative_mode
+        allow_implied = self.config.extract_implied_elements
+
+        # --- HELPER: Handles one AI call and respects the Thread Limit ---
+        async def run_ai_call(prompt_func, active_cats, label):
+            # Each individual pass checks the semaphore bowl for a token
+            async with self.semaphore:
+                print(f"      [Sc {scene.scene_number}] Pass {label}...")
+                prompt = prompt_func(
+                    scene_text=scene.description if label != "Core Narrative" else scene.script_text,
+                    scene_num=scene.scene_number,
+                    selected_tech_cats=active_cats,
+                    conservative=is_conservative,
+                    implied=allow_implied
+                )
+                # If it's Pass 1, we use the core prompt logic
+                if label == "Core Narrative":
+                    # Note: Pass 1 uses more variables, usually handled in the prompt_func itself
+                    pass 
+                
+                return await self.client.generate_breakdown(prompt, options=llm_options)
+
+        # 1. CATEGORY MAPPING
+        active_p1 = [c for c in categories if c in PASS_1_CATEGORIES]
+        active_p2 = [c for c in categories if c in PASS_2_CATEGORIES]
+        active_p3 = [c for c in categories if c in PASS_3_CATEGORIES]
+        active_p4 = [c for c in categories if c in PASS_4_CATEGORIES]
+
+        # 2. PASS 1 (CORE) - Must run first to generate the scene description
+        # We call the core prompt directly here to maintain your current variables
         async with self.semaphore:
-            if not self.is_running:
-                return None
-
-            llm_options = {"temperature": self.config.temperature}
-            is_conservative = self.config.conservative_mode
-            allow_implied = self.config.extract_implied_elements
-
-            # Map categories to passes
-            active_p1 = [c for c in categories if c in PASS_1_CATEGORIES]
-            active_p2 = [c for c in categories if c in PASS_2_CATEGORIES]
-            active_p3 = [c for c in categories if c in PASS_3_CATEGORIES]
-            active_p4 = [c for c in categories if c in PASS_4_CATEGORIES]
-
-            # Pass 1: Core Narrative (Updates Synopsis/Description)
             print(f"      [Sc {scene.scene_number}] Pass 1/4: Core Narrative...")
             core_prompt = get_core_prompt(
-                scene_text=scene.script_text,
-                scene_num=scene.scene_number,
-                set_name=scene.set_name,
-                day_night=scene.day_night,
-                int_ext=scene.int_ext,
-                selected_core_cats=active_p1,
-                conservative=is_conservative,
-                implied=allow_implied
+                scene.script_text, scene.scene_number, scene.set_name,
+                scene.day_night, scene.int_ext, active_p1, is_conservative, allow_implied
             )
             core_result = await self.client.generate_breakdown(core_prompt, options=llm_options)
 
-            if not core_result:
-                logging.error(f"Pass 1 failed for Scene {scene.scene_number}")
-                return None
+        if not core_result:
+            return None
 
-            # Update Scene synopsis, description and core elements
-            scene.synopsis = core_result.get("synopsis", "")[:150]
-            scene.description = core_result.get("description", "")
-            
-            all_elements = []
-            if "elements" in core_result:
-                all_elements.extend([Element(**e) for e in core_result["elements"]])
+        scene.synopsis = core_result.get("synopsis", "")[:150]
+        scene.description = core_result.get("description", "")
+        
+        all_elements = []
+        if "elements" in core_result:
+            all_elements.extend([Element(**e) for e in core_result["elements"]])
 
-            # Passes 2-4: Technical Elements
-            pass_configs = [
-                (active_p2, get_set_prompt, "Set & Vehicles"),
-                (active_p3, get_action_prompt, "Props & SFX"),
-                (active_p4, get_gear_prompt, "Technical Gear")
-            ]
+        # 3. PASSES 2-4 (TECHNICAL) - Run these in parallel
+        tech_tasks = []
+        if active_p2: tech_tasks.append(run_ai_call(get_set_prompt, active_p2, "Set & Vehicles"))
+        if active_p3: tech_tasks.append(run_ai_call(get_action_prompt, active_p3, "Props & SFX"))
+        if active_p4: tech_tasks.append(run_ai_call(get_gear_prompt, active_p4, "Technical Gear"))
 
-            for active_cats, prompt_func, label in pass_configs:
-                if active_cats:
-                    print(f"      [Sc {scene.scene_number}] Pass {label}...")
-                    prompt = prompt_func(
-                        scene_text=scene.description,
-                        scene_num=scene.scene_number,
-                        selected_tech_cats=active_cats,
-                        conservative=is_conservative,
-                        implied=allow_implied
-                    )
-                    res = await self.client.generate_breakdown(prompt, options=llm_options)
-                    if res and "elements" in res:
-                        all_elements.extend([Element(**e) for e in res["elements"]])
+        # Fire all technical passes at once!
+        # If worker_threads=1, they run one-by-one. If worker_threads=4, they run all at once.
+        results = await asyncio.gather(*tech_tasks)
 
-            scene.elements = all_elements
-            return scene
+        for res in results:
+            if res and "elements" in res:
+                all_elements.extend([Element(**e) for e in res["elements"]])
+
+        scene.elements = all_elements
+        return scene
         
 
     async def run_continuity_pass(self, scene: Scene, history_summary: str) -> str:
@@ -193,7 +202,7 @@ class ScriptAnalyzer:
             elif isinstance(n, str):
                 formatted.append(n)
 
-        return "\n".join(formatted)
+        return " | ".join(formatted) if formatted else ""
     
     async def run_flag_pass(self, text: str, elements: List[Element], scene_num: str) -> List[ReviewFlag]:
         """Safety pass to identify production risks."""
@@ -213,19 +222,27 @@ class ScriptAnalyzer:
                 continue
         return flags
 
-    def _update_history(self, elements: List[Element]):
-        """Updates the master history catalog for the Matchmaker agent."""
+    def _update_history(self, elements: List[Element], scene_num: str):
+        """Updates history with item name and the specific scene number."""
         for el in elements:
             cat = el.category.upper()
-            name = el.name.upper()
+            name = el.name.upper().strip()
             if cat not in self.master_history:
-                self.master_history[cat] = set()
-            self.master_history[cat].add(name)
+                self.master_history[cat] = {}  # Now a dictionary
+            # Store the scene number as the value
+            self.master_history[cat][name] = scene_num
 
     def _get_history_summary(self) -> str:
-        """Formats the master history for AI context."""
-        lines = [f"CATEGORY {c}: {', '.join(sorted(items))}" for c, items in self.master_history.items()]
-        return "\n".join(lines) if lines else "CATALOG EMPTY."
+        """Formats history: 'CATEGORY: ITEM (Sc 1), ITEM (Sc 2)'"""
+        if not self.master_history:
+            return "CATALOG EMPTY."
+        
+        lines = []
+        for cat, items in self.master_history.items():
+            # Create strings that look like "DUFFEL BAGS (Sc 1)"
+            item_refs = [f"{name} (Sc {sn})" for name, sn in items.items()]
+            lines.append(f"CATEGORY {cat}: {', '.join(sorted(item_refs))}")
+        return "\n".join(lines)
     
     def _filter_scenes(self, scenes: List[Scene], start_num: str, end_num: str) -> List[Scene]:
         """Filters the scene list based on start and end scene numbers."""

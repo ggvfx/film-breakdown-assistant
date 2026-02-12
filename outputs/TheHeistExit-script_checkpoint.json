@@ -89,11 +89,11 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "LASER GRIDS -> N/A: \nSTACKS OF CASH -> N/A: \nDUFFEL BAGS -> N/A: Use Scene 1 Duffel Bags\nBYPASS MODULE -> N/A: \nbypass module -> sparkling: sparking on the floor\ncable -> ripped out: Mira rips a cable out\nvault door -> groaning: The vault door groans",
+        "continuity_notes": "Laser Grids -> Exact match from Reference Catalog: Use Scene 1 Laser Grids | Bypass Module -> Exact match from Reference Catalog: Use a functional Bypass Module | Cash Stacks -> No exact match in Reference Catalog, but likely to be Cash ( generic noun): Verify Cash Stacks are consistent with previous scene | LASER GRIDS\u2014vibrant, humming webs of red light -> shorted out by a bypass module sparking on the floor: Broken",
         "flags": [
             {
                 "flag_type": "SAFETY",
-                "note": "Text describes physical risks like combat (\"move. Now.\") and specialized movement (vaulting).",
+                "note": "Physical risks like specialized movement (e.g. vaulting) and high-impact stunts.",
                 "severity": 3
             }
         ]
@@ -160,12 +160,17 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "marble -> CATEGORY BACKGROUND ACTORS: DUFFEL BAGS (6): Note: Background Actors could potentially be marble dummies or objects\ncounter -> CATEGORY SET DRESSING: STACKS OF CASH: Use Scene 1 Counter\npolished wood -> CATEGORY BACKGROUND ACTORS: LASER GRIDS (6): Note: Could use laser grid for visual effect or pattern on polished wood\nduffel bags -> CATEGORY PROPS: DUFFEL BAGS (6): Use Scene 1 Duffel Bags\nlaser grids -> CATEGORY SPECIAL EQUIPMENT: LASER GRIDS: Check functionality of laser grid for visual effect or timing purposes\nstacks of cash -> CATEGORY SET DRESSING: STACKS OF CASH: Verify authenticity and condition of stacks of cash\nRain-slicked pavement -> Wetted: The rain has made the pavement wet.\nMahogany counter -> None (no physical change): No change in state",
+        "continuity_notes": "marble -> Category BACKGROUND ACTORS: marble (Sc 1): Use Scene 1 Marble | mahogany counter -> Use generic noun and match with Category SET DRESSING: mahogany furniture (Sc 1): Use Scene 1 Mahogany Furniture | polished wood -> Use generic noun and match with Category BACKGROUND ACTORS: polished wood floor (Sc 1): Use Scene 1 Polished Wood Floor | bags -> dropped: They were placed on the other side of the counter. | glass at front door -> untouched: Mira is pressing her back against it, implying that it has not been affected physically.",
         "flags": [
             {
                 "flag_type": "SAFETY",
-                "note": "Jax vaults over the mahogany counter with a stunt move.",
+                "note": "VAULTING stunt performed by Jax",
                 "severity": 3
+            },
+            {
+                "flag_type": "LOGISTICS",
+                "note": "Weather effect: rain on the pavement",
+                "severity": 1
             }
         ]
     },
@@ -217,16 +222,16 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "police cruisers -> CATEGORY BACKGROUND ACTORS: BYSTANDERS (0): \nmarble pillar -> N/A: Use existing Set Dressing from Reference Catalog\ndetonator -> N/A: Use existing Props from Reference Catalog (if not, list in GAP FILLING)\nglass doors -> SHATTERED: Physical state changed due to detonator explosion",
+        "continuity_notes": "police cruisers -> STACKS OF CASH (Sc 1): Use Scene 1 Stacks of Cash, but change lighting color to strobe-light effect | marble pillar -> LASER GRIDS (Sc 1) - Incorrect match: marble not mentioned in Ref Catalog. However, as a background element, it should be noted.: Note presence of marble pillar for future continuity | detonator -> STACKS OF CASH (Sc 1): Use Scene 1 Duffel Bags as detonator prop, and swap with one from Sc 1 Stacks of Cash | Glass doors -> Shattered: BOOM. The glass doors SHATTER.",
         "flags": [
             {
-                "flag_type": "WEAPONRY",
-                "note": "Explosives used in scene (mag-locks)",
+                "flag_type": "SAFETY",
+                "note": "Detonator use and shattering glass doors. Potential for injury.",
                 "severity": 3
             },
             {
-                "flag_type": "SAFETY",
-                "note": "Physical risks like explosive detonation and glass shattering.",
+                "flag_type": "WEAPONRY",
+                "note": "Explosives (detonator) used in scene.",
                 "severity": 3
             }
         ]
@@ -342,22 +347,22 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "TWENTY BYSTANDERS -> None (Bystanders not specified in catalog): \nPOLICE OFFICERS -> None (Police Officers not specified in catalog): \nFIVE VEHICLES -> Four Police Cruisers and one Getaway Van (matching category: Vehicles): Use four Police Cruisers from the catalog and add a matte-black Getaway Van to match the description.\nMAHOGANY COUNTER -> Mahogany Counter (matching category: Props/Set Dressing): \nPOLISHED WOOD FLOOR -> Polished Wood Floor (matching category: Set Dressing/Props): \nSTACKS OF CASH -> Stacks of Cash (matching category: Props/Set Dressing/Miscellaneous): \nGlass -> Shattered: Glass crunches under boots.\nPolice Cruisers -> N/A: Four Police Cruisers forming a barricade\nGetaway Van -> Armor scratched or damaged (not explicitly stated, but bullets PING off): The van screeches forward, fishtailing into the night.",
+        "continuity_notes": "Glass -> Polished Wood Floor (Sc 2): Use Scene 2 Polished Wood Floor | Bags -> Duffel Bags (Sc 1): Matches Sc 1 Duffel Bags | Police Cruisers -> POLISHED WOOD (Sc 2) and MAHOGANY COUNTER (Sc 2): Use Scene 2 Polished Wood and Mahogany Counter for cruisers | MAG-LOCKS -> Scene 3 MAG-LOCKS: Use Scene 3 MAG-LOCKS | Glass -> Shattered: Crunches under boots | Bags -> Tossed in the van: Mira tosses her bags in. Jax dives in after her",
         "flags": [
             {
+                "flag_type": "LOGISTICS",
+                "note": "High-complexity environment: large crowd (TWENTY BYSTANDERS), police officers, and vehicle coordination.",
+                "severity": 1
+            },
+            {
                 "flag_type": "WEAPONRY",
-                "note": "Bullets and flash-bang involved.",
+                "note": "Firearms (bullets PING off the armor) and explosives (flash-bang).",
                 "severity": 3
             },
             {
                 "flag_type": "SAFETY",
-                "note": "Physical risks like combat, falls (GETAWAY VAN fishtailing), and specialized movement implied.",
+                "note": "Stunts: diving in after someone, fishtailing into the night.",
                 "severity": 3
-            },
-            {
-                "flag_type": "LOGISTICS",
-                "note": "High-complexity environment with large crowds (TWENTY BYSTANDERS) and significant vehicle coordination (FIVE VEHICLES).",
-                "severity": 1
             }
         ]
     }

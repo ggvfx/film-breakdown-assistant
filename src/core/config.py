@@ -9,6 +9,15 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 from src.core.models import MMS_CATEGORIES
 
+
+# --- PERFORMANCE MAPPING ---
+PERFORMANCE_LEVELS = {
+    "Eco": 1,
+    "Power": 4,
+    "Turbo": 6,
+    "Max": 8
+}
+
 class ProjectConfig(BaseModel):
     """
     Application-wide settings and user preferences.
@@ -27,9 +36,9 @@ class ProjectConfig(BaseModel):
     conservative_mode: bool = True
     extract_implied_elements: bool = False
     
-    # Performance & Concurrency
-    eco_mode: bool = True
-    worker_threads: int = Field(default=1, ge=1, le=8)
+    ## Performance & Concurrency
+    performance_mode: str = "Power" 
+    worker_threads: int = Field(default=4, ge=1, le=8)
     
     # Movie Magic Setup
     mms_categories: List[str] = Field(default_factory=lambda: list(MMS_CATEGORIES))
@@ -59,6 +68,15 @@ class ProjectConfig(BaseModel):
     
     # GUI State
     auto_save_enabled: bool = True
+
+    # --- HELPERS ---
+    def set_performance_level(self, mode: str):
+        """Updates the thread count based on the selected named mode."""
+        if mode in PERFORMANCE_LEVELS:
+            self.performance_mode = mode
+            self.worker_threads = PERFORMANCE_LEVELS[mode]
+            # Debug print to verify it's working
+            print(f"DEBUG: Performance set to {mode} ({self.worker_threads} threads)")
 
 # --- GLOBAL INSTANCE ---
 # This serves as the 'Live' config the app refers to.
