@@ -9,9 +9,9 @@ The core logic is currently functional via CLI, utilizing Pydantic for data vali
 **Next Milestone:** Implementing .sex (Scheduling Export) support to enable direct, one-click ingestion into Movie Magic Scheduling, eliminating the need for manual data re-entry.
 
 ## Strategic Roadmap
-* **Phase 1 (Current):** Refine CLI-based parsing for .fdx and .pdf; optimize Llama 3.1 8B prompt strategies for "Intent-Based" safety and regulatory flagging; implement Continuity & Review Flag Agents for element reconciliation and production risk auditing.
-* **Phase 2 (Immediate):** Develop the .sex export module; integrate AD Alert custom categories for Movie Magic Scheduling.
-* **Phase 3 (Q1 2026):** Transition to a PySide6 (Qt) interface for professional session management and local database persistence.
+* **Phase 1 (Complete):** Core multi-format parsing; 4-Pass Agentic pipeline (Harvester, Continuity, Flags); Decoupled export logic with JSON checkpointing.
+* **Phase 2 (Current):** Code refactoring for GUI readiness; Transition to PySide6 (Qt) interface for session management; Implementation of Eco/Power modes.
+* **Phase 3 (Next):** Finalize Movie Magic XML export; Rigorous testing of FDX tag extraction; Iterative prompt tuning for safety/regulatory precision.
 
 ## 🚀 Overview
 The **Film Breakdown Assistant** is a professional-grade utility designed to eliminate the manual "heavy lifting" of the script breakdown process. By automating the extraction of 80%+ of repetitive "grunt work," it empowers Assistant Directors and Production Managers to shift their focus from rote data entry to high-level logistical strategy and creative problem-solving.
