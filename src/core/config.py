@@ -33,6 +33,7 @@ class ProjectConfig:
     
     # Performance Settings
     # Eco Mode: 1 worker thread. Power Mode: >1 worker threads.
+    eco_mode: bool = True
     worker_threads: int = 1 
     
     # Range Selection Settings
