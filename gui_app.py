@@ -25,7 +25,8 @@ def run_gui():
 
     # Pass everything to the Window
     # The Window now has access to the analyzer, parser, and exporter
-    window = MainWindow(analyzer, DEFAULT_CONFIG)
+    # Pass the analyzer, config, parser, and exporter into the window
+    window = MainWindow(analyzer, DEFAULT_CONFIG, parser=parser, exporter=exporter)
     
     # Attach the parser and exporter to the window so it can use them later
     window.parser = parser

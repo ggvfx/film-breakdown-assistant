@@ -36,9 +36,10 @@ class MainWindow(QMainWindow):
         self._build_review_ui()
 
     def _build_setup_ui(self):
-        # Base Layout
         layout = QVBoxLayout(self.setup_tab)
         layout.setSpacing(15)
+        # Add this line: it forces all widgets to stay at the top of the tab
+        layout.setAlignment(Qt.AlignTop)
 
         # 1 Script Selection & Project Management (Renamed and Grouped)
         selection_group = QGroupBox("Script Selection & Project Management")
@@ -147,41 +148,48 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(self.btn_run)
         layout.addWidget(self.pbar)
-
-        # 6. Expanding Log (Hidden by default)
+        # 1. Add the log first
         self.log_output = QTextEdit()
         self.log_output.setReadOnly(True)
         self.log_output.setVisible(False)
         layout.addWidget(self.log_output)
 
+        # 2. Insert a spacer ABOVE the log (at the index before the log)
+        # We don't save it to a variable, we will find it by its position.
+        #layout.addStretch(1)
+
     def toggle_log_expansion(self, visible):
-        """Manually forces the window to grow down or shrink up."""
-        # 1. Capture current dimensions
+        """Grows the window down. Items stay at the top due to AlignTop."""
         current_w = self.width()
         current_h = self.height()
-        
-        # 2. Toggle the visibility
-        self.log_output.setVisible(visible)
-        
+        log_height = 250 
+
         if visible:
-            # Grow: Keep width, but add 250 pixels to the height for the log
-            self.log_output.setMinimumHeight(250)
-            self.resize(current_w, current_h + 250)
+            self.log_output.setFixedHeight(log_height)
+            self.log_output.setVisible(True)
+            self.resize(current_w, current_h + log_height)
         else:
-            # Shrink: Keep width, but subtract that 250 pixels back
-            self.log_output.setMinimumHeight(0)
-            self.resize(current_w, current_h - 250)
+            self.log_output.setVisible(False)
+            # This ensures the window actually snaps back up
+            self.resize(current_w, current_h - log_height)
             
-        # 3. Ensure the layout updates properly
+        # Forces the window to recalculate and remove any 'ghost' grey space
         self.update()
 
     def _build_review_ui(self):
         layout = QVBoxLayout(self.review_tab)
         
         self.table = QTableWidget()
-        # Set column count to match standard breakdown sheets
-        self.table.setColumnCount(12) 
-        self.table.setHorizontalHeaderLabels(["Scene", "Set", "Description", "Cast", "Props", "Wardrobe", "SFX", "Vehicles", "Stunts", "Continuity", "Flags", "Notes"])
+        # Set to 32 columns based on your CSV reference
+        self.table.setColumnCount(32) 
+        self.table.setHorizontalHeaderLabels([
+            "Scene", "Int/Ext", "Set", "Day/Night", "Pages", "Synopsis", "Description",
+            "Cast Members", "Background Actors", "Stunts", "Vehicles", "Props", "Camera",
+            "Special Effects", "Wardrobe", "Makeup/Hair", "Animals", "Animal Wrangler",
+            "Music", "Sound", "Art Department", "Set Dressing", "Greenery", 
+            "Special Equipment", "Security", "Additional Labor", "Visual Effects", 
+            "Mechanical Effects", "Miscellaneous", "Notes", "Continuity Notes", "Review Flags"
+        ])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.table.setWordWrap(True)
         layout.addWidget(self.table)
@@ -208,28 +216,40 @@ class MainWindow(QMainWindow):
         layout.addLayout(bot)
 
     def populate_table(self, scenes):
-        """Fills the Review Tab table with scene data."""
+        """Fills the Review Tab table with all 32 columns from core.models."""
         self.table.setRowCount(len(scenes))
         
+        # List of element categories in the exact order they appear in your CSV (columns 7 to 29)
+        element_categories = [
+            "Cast Members", "Background Actors", "Stunts", "Vehicles", "Props", "Camera",
+            "Special Effects", "Wardrobe", "Makeup/Hair", "Animals", "Animal Wrangler",
+            "Music", "Sound", "Art Department", "Set Dressing", "Greenery", 
+            "Special Equipment", "Security", "Additional Labor", "Visual Effects", 
+            "Mechanical Effects", "Miscellaneous", "Notes"
+        ]
+        
         for row, scene in enumerate(scenes):
-            # Column Order: Scene, Set, Description, Cast, Props, etc.
+            # Header & Info (Cols 0-6)
             self.table.setItem(row, 0, QTableWidgetItem(str(scene.scene_number)))
-            self.table.setItem(row, 1, QTableWidgetItem(scene.set_name))
-            self.table.setItem(row, 2, QTableWidgetItem(scene.description))
+            self.table.setItem(row, 1, QTableWidgetItem(scene.int_ext))
+            self.table.setItem(row, 2, QTableWidgetItem(scene.set_name))
+            self.table.setItem(row, 3, QTableWidgetItem(scene.day_night))
+            self.table.setItem(row, 4, QTableWidgetItem(scene.total_pages_display))
+            self.table.setItem(row, 5, QTableWidgetItem(scene.synopsis))
+            self.table.setItem(row, 6, QTableWidgetItem(scene.description))
             
-            # Group elements by category for the columns
-            # This is a simple way to comma-separate names
-            cast = ", ".join([e.name for e in scene.elements if e.category == "Cast Members"])
-            props = ", ".join([e.name for e in scene.elements if e.category == "Props"])
+            # Element Categories (Cols 7-29)
+            for i, cat_name in enumerate(element_categories):
+                # Filter elements belonging to this category and join their names
+                elements_str = ", ".join([e.name for e in scene.elements if e.category == cat_name])
+                self.table.setItem(row, 7 + i, QTableWidgetItem(elements_str))
+                
+            # Final Analysis Columns (Cols 30-31)
+            self.table.setItem(row, 30, QTableWidgetItem(scene.continuity_notes or ""))
             
-            self.table.setItem(row, 3, QTableWidgetItem(cast))
-            self.table.setItem(row, 4, QTableWidgetItem(props))
-            # ... add other categories as needed ...
-            
-            # Continuity and Flags
-            self.table.setItem(row, 9, QTableWidgetItem(scene.continuity_notes or ""))
-            flag_text = " | ".join([f.warning for f in scene.flags])
-            self.table.setItem(row, 10, QTableWidgetItem(flag_text))
+            # Review Flags - using 'note' and 'flag_type' from your ReviewFlag model
+            flag_texts = [f"[{f.flag_type}] {f.note}" for f in scene.flags]
+            self.table.setItem(row, 31, QTableWidgetItem(" | ".join(flag_texts)))
 
     def handle_file_selection(self):
         path, _ = QFileDialog.getOpenFileName(self, "Select Script", "", "Scripts (*.pdf *.fdx *.txt)")
@@ -264,7 +284,7 @@ class MainWindow(QMainWindow):
         try:
             # This turns the JSON back into Scene objects
             loaded_scenes = load_checkpoint(latest_file) 
-            
+            self.current_scenes = loaded_scenes
             # 3. Populate the Review Table and unlock the tab
             self.populate_table(loaded_scenes)
             self.tabs.setTabEnabled(1, True)
@@ -303,26 +323,44 @@ class MainWindow(QMainWindow):
         # Logic to populate table goes here
 
     def handle_export(self):
-        """Triggered by the Export button. Uses your DataExporter logic."""
-        # We need access to the exporter. Ensure it's available in __init__ 
-        # or import it here if you haven't passed it in gui_app.py
-        from src.core.exporter import DataExporter
-        exporter = DataExporter()
-
+        """Processes the checked export formats using the DataExporter."""
         if not self.current_scenes:
-            self.log_output.append("ERROR: No data to export.")
+            self.log_output.append("ERROR: No data available to export. Load a checkpoint first.")
             return
 
-        # Determine path (usually same folder as script)
+        # 1. Prepare the output directory
         output_dir = "outputs"
         os.makedirs(output_dir, exist_ok=True)
-        base_name = "Breakdown_Export"
+        
+        # Use the script name for the filename if available, otherwise 'Breakdown'
+        base_filename = "Breakdown_Export"
+        if hasattr(self, 'lbl_path') and self.lbl_path.text() != "No file selected...":
+            script_name = os.path.basename(self.lbl_path.text()).split('.')[0]
+            base_filename = f"{script_name}_breakdown"
 
-        if self.chk_xls.isChecked():
-            exporter.export_to_excel(self.current_scenes, os.path.join(output_dir, f"{base_name}.xlsx"))
-        if self.chk_csv.isChecked():
-            exporter.export_to_csv(self.current_scenes, os.path.join(output_dir, f"{base_name}.csv"))
-        if self.chk_sex.isChecked():
-            exporter.export_to_mms(self.current_scenes, os.path.join(output_dir, f"{base_name}.sex"))
+        # 2. Run the exports based on checkboxes
+        try:
+            exported_files = []
             
-        self.log_output.append("SUCCESS: Exported selected formats to /outputs")
+            if self.chk_xls.isChecked():
+                path = os.path.join(output_dir, f"{base_filename}.xlsx")
+                self.exporter.export_to_excel(self.current_scenes, path)
+                exported_files.append("Excel")
+
+            if self.chk_csv.isChecked():
+                path = os.path.join(output_dir, f"{base_filename}.csv")
+                self.exporter.export_to_csv(self.current_scenes, path)
+                exported_files.append("CSV")
+
+            if self.chk_sex.isChecked():
+                path = os.path.join(output_dir, f"{base_filename}.sex")
+                self.exporter.export_to_mms(self.current_scenes, path)
+                exported_files.append("MMS (.sex)")
+
+            if exported_files:
+                self.log_output.append(f"SUCCESS: Exported {', '.join(exported_files)} to {output_dir}")
+            else:
+                self.log_output.append("WARNING: No export format selected. Check Excel, CSV, or MMS.")
+
+        except Exception as e:
+            self.log_output.append(f"ERROR: Export failed: {str(e)}")
