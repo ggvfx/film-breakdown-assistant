@@ -3,9 +3,9 @@ from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QPushButton, QLabel, QCheckBox, QComboBox, QProgressBar, 
     QTextEdit, QTableWidget, QFileDialog, QGroupBox, QScrollArea, 
-    QHeaderView, QTableWidgetItem, QDoubleSpinBox
+    QHeaderView, QTableWidgetItem, QDoubleSpinBox, QSpinBox
 )
-from PySide6.QtCore import Qt, QThread
+from PySide6.QtCore import Qt, QThread, QTimer
 from src.ui.worker import AnalysisWorker
 from src.core.models import MMS_CATEGORIES
 
@@ -196,10 +196,28 @@ class MainWindow(QMainWindow):
 
         # Bottom Bar
         bot = QHBoxLayout()
+        
+        # User Save Button
         self.btn_save = QPushButton("Save Checkpoint")
-        self.chk_auto = QCheckBox("Autosave")
+        self.btn_save.clicked.connect(self.handle_user_save) 
+        
+        # Autosave Controls
+        self.chk_auto = QCheckBox("Autosave every")
         self.chk_auto.setChecked(True)
         
+        self.spin_auto_interval = QSpinBox()
+        self.spin_auto_interval.setRange(1, 60)
+        self.spin_auto_interval.setValue(5) 
+        self.spin_auto_interval.setSuffix(" mins")
+        # Update timer if the user changes the number
+        self.spin_auto_interval.valueChanged.connect(self.reset_autosave_timer)
+
+        # Setup the Timer
+        self.autosave_timer = QTimer(self)
+        self.autosave_timer.timeout.connect(self.run_autosave)
+        self.autosave_timer.start(5 * 60 * 1000) # Start at 5 mins (ms)
+
+        # Export Group
         export_box = QGroupBox("Export Options")
         eb_l = QHBoxLayout()
         self.chk_xls = QCheckBox("Excel")
@@ -210,7 +228,11 @@ class MainWindow(QMainWindow):
         eb_l.addWidget(self.chk_xls); eb_l.addWidget(self.chk_csv); eb_l.addWidget(self.chk_sex); eb_l.addWidget(self.btn_export)
         export_box.setLayout(eb_l)
 
-        bot.addWidget(self.btn_save); bot.addWidget(self.chk_auto)
+        # Assemble Bottom Bar
+        bot.addWidget(self.btn_save)
+        bot.addSpacing(20) # Space between User Save and Autosave
+        bot.addWidget(self.chk_auto)
+        bot.addWidget(self.spin_auto_interval)
         bot.addStretch()
         bot.addWidget(export_box)
         layout.addLayout(bot)
@@ -252,7 +274,7 @@ class MainWindow(QMainWindow):
             self.table.setItem(row, 31, QTableWidgetItem(" | ".join(flag_texts)))
 
     def handle_file_selection(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select Script", "", "Scripts (*.pdf *.fdx *.txt)")
+        path, _ = QFileDialog.getOpenFileName(self, "Select Script", "", "Scripts (*.pdf *.fdx *.txt *.docx *.doc *.rtf)")
         if path:
             self.lbl_path.setText(path)
             # This is Step 1 from your original main.py:
@@ -295,32 +317,60 @@ class MainWindow(QMainWindow):
             self.log_output.append(f"ERROR: Failed to load checkpoint: {str(e)}")
 
     def start_analysis(self):
-        # 1. Sync UI to Config
+        """Prepares config and starts the background worker."""
+        if not self.current_scenes:
+            self.log_output.append("ERROR: No scenes to analyze. Please select a script first.")
+            return
+
+        # 1. Sync UI Settings to Config
         self.config.set_performance_level(self.combo_perf.currentText())
         self.config.use_continuity_agent = self.chk_cont.isChecked()
         self.config.use_flag_agent = self.chk_flag.isChecked()
+        self.config.temperature = self.spin_temp.value()
+        self.config.conservative_mode = self.chk_cons.isChecked()
+        self.config.extract_implied_elements = self.chk_implied.isChecked() # Updated this line
         
-        # 2. Setup Worker
-        # For this test, assume current_scenes is populated by your parser logic
+        # 2. Identify selected categories
         active_cats = [c for c, cb in self.cat_boxes.items() if cb.isChecked()]
         
+        # 3. Setup Worker & Thread
         self.btn_run.setEnabled(False)
+        self.pbar.setValue(0)
+        
         self.worker_thread = QThread()
         self.worker = AnalysisWorker(self.analyzer, self.current_scenes, active_cats)
         self.worker.moveToThread(self.worker_thread)
         
+        # 4. Connect Signals
         self.worker_thread.started.connect(self.worker.run)
         self.worker.log_signal.connect(self.log_output.append)
+        
+        # Ensure AnalysisWorker has a progress_signal(int)
+        if hasattr(self.worker, 'progress_signal'):
+            self.worker.progress_signal.connect(self.pbar.setValue) 
+        
         self.worker.finished.connect(self.on_analysis_finished)
         
         self.worker_thread.start()
+        self.log_output.append(f"START: Analyzing {len(self.current_scenes)} scenes...")
 
     def on_analysis_finished(self, results):
+        """Called when AI processing is complete."""
         self.btn_run.setEnabled(True)
-        self.tabs.setTabEnabled(1, True)
-        self.tabs.setCurrentIndex(1) # Switch to Review
         self.worker_thread.quit()
-        # Logic to populate table goes here
+        
+        # Update memory with the analyzed scenes
+        self.current_scenes = results
+        
+        # Fill the table
+        self.populate_table(self.current_scenes)
+        
+        # Unlock the review tab and switch to it
+        self.tabs.setTabEnabled(1, True)
+        self.tabs.setCurrentIndex(1) 
+        
+        self.log_output.append("SUCCESS: Analysis complete. Data moved to Review Tab.")
+        self.pbar.setValue(100)
 
     def handle_export(self):
         """Processes the checked export formats using the DataExporter."""
@@ -364,3 +414,40 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             self.log_output.append(f"ERROR: Export failed: {str(e)}")
+
+    def reset_autosave_timer(self):
+        """Restarts timer with the new interval from the spinbox."""
+        mins = self.spin_auto_interval.value()
+        self.autosave_timer.start(mins * 60 * 1000)
+
+    def handle_user_save(self):
+        """Manual save triggered by the user - asks for a filename."""
+        path, _ = QFileDialog.getSaveFileName(self, "Save Checkpoint", "outputs/", "JSON (*.json)")
+        if path:
+            from src.core.utils import save_checkpoint
+            save_checkpoint(self.current_scenes, path)
+            self.log_output.append(f"SUCCESS: Manual checkpoint saved to {path}")
+
+    def run_autosave(self):
+        """Automatic background save. Rotates through 10 files in /outputs/autosaves/"""
+        if not self.chk_auto.isChecked() or not self.current_scenes:
+            return
+
+        from src.core.utils import save_checkpoint
+        
+        # Create folder if missing
+        auto_dir = os.path.join("outputs", "autosaves")
+        os.makedirs(auto_dir, exist_ok=True)
+        
+        if not hasattr(self, '_auto_save_counter'):
+            self._auto_save_counter = 1
+        
+        filename = f"autosave_v{self._auto_save_counter}.json"
+        path = os.path.join(auto_dir, filename)
+        
+        save_checkpoint(self.current_scenes, path)
+        self.log_output.append(f"AUTO: Saved backup {self._auto_save_counter}/10")
+        
+        # Increment and wrap at 10
+        self._auto_save_counter = (self._auto_save_counter % 10) + 1
+            

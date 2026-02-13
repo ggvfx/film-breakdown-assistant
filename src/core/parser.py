@@ -84,9 +84,9 @@ class ScriptParser:
         return "\n".join(lines)
 
     def _extract_rtf(self, path: str) -> str:
-        """Cleans RTF formatting codes into plain text."""
-        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-            return rtf_to_text(f.read())
+        """Cleans RTF formatting codes into plain text using binary read."""
+        with open(path, 'rb') as f: # Read as binary
+            return rtf_to_text(f.read().decode('ascii', errors='ignore'))
 
     def _extract_txt(self, path: str) -> str:
         """Reads standard text files."""

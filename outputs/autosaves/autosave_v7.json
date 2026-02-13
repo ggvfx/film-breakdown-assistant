@@ -1,0 +1,64 @@
+[
+    {
+        "scene_number": "1",
+        "int_ext": "INT",
+        "set_name": "RESEARCH LAB",
+        "day_night": "NIGHT",
+        "scene_index": 1,
+        "pages_whole": 1,
+        "pages_eighths": 2,
+        "script_text": "The lab is a sprawling cathedral of glass and steel. \n       A pervasive CHEMICAL SMELL\u2014sharp, like ionized sulfur\u2014\n       hangs in the air. \n\n\n       SIX SCIENTISTS (Background) move with clinical urgency. \n       Two monitor a row of shimmering BEAKERS filled with \n       luminescent sludge. Three others cluster around a \n       battery of humming ULTRACENTRIFUGES. The sixth enters \n       data into a wall-mounted glass interface.\n\n\n       Dominating the center of the room is a massive industrial \n       CRANE. Its hydraulic arm suspends a lead-lined containment \n       unit over a REACTION CHAMBER.\n\n\n       Other props clutter the space: \n       - ELECTRON MICROSCOPES \n       - LIQUID NITROGEN DEWARS (venting cold vapor)\n       - SPECTROMETERS\n       - OSCILLOSCOPES flickering with green waves\n       - VIAL RACKS\n       - BEXTER FLASKS\n       - PETRI DISHES\n       - INCUBATORS\n       - PIPETTES\n       - HAZMAT KITS\n       - GEL ELECTROPHORESIS TANKS.\n\n\n       STUNT SEQUENCE:\n\n\n       Suddenly, a pressure seal on the containment unit \n       FAILURE-HISSES. A thick plume of acrid SMOKE errupts.\n\n\n       TWO STUNT GUARDS in tactical gear rush the platform. \n\n\n       GUARD 1 slides under the swinging arm of the CRANE as \n       the internal alarms scream. \n\n\n       GUARD 2 is thrown back by a concussive burst of pressure, \n       performing a full-body flip onto a stack of equipment \n       crates. \n\n\n       The Scientists dive for cover behind the centrifuges as \n       the crane begins to buckle under a strange, violet \n       gravitational pull.\n\n\n                               DR. ARIS\n                 Don't let the containment drop! If \n                 that seal breaks, the city is gone!\n\n\n       The crane groans. The smoke thickens, turning a deep, \n       unnatural purple.\n\n\n                                               FADE OUT.",
+        "synopsis": "Lab equipment failure",
+        "description": "Scientists work in a lab when equipment fails, causing chaos.",
+        "elements": [
+            {
+                "name": "SCIENTISTS (6)",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "GUARD 1",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "GUARD 2",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "EQUIPMENT",
+                "category": "Mechanical Effects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "LAB",
+                "category": "Art Department",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "ELECTRON MICROSCOPES -> None found in Reference Catalog, but likely matches Scanning Electron Microscopes:  | LIQUID NITROGEN DEWARS (venting cold vapor) -> Matches Liquid Nitrogen Dewars from Reference Catalog: No additional instructions | SPECTROMETERS -> None found in Reference Catalog, but likely matches Mass Spectrometers or other types of Spectrometers:  | OSCILLOSCOPES flickering with green waves -> Matches Oscilloscopes from Reference Catalog: Note the specific color and action | VIAL RACKS -> None found in Reference Catalog, but likely matches Pipette Racks or Vial Holders:  | BEXTER FLASKS -> Matches Erlenmeyer Flasks from Reference Catalog (Note: Bexer is not a standard term): Use Erlenmeyer Flasks | PETRI DISHES -> Matches Petri Dishes from Reference Catalog: No additional instructions | INCUBATORS -> None found in Reference Catalog, but likely matches Bacterial Incubators or other types of incubators:  | PIPETTES -> Matches Pipettes from Reference Catalog: No additional instructions | HAZMAT KITS -> None found in Reference Catalog, but likely matches Standard Hazmat Kits or specific types of Hazmat Kits:  | GEL ELECTROPHORESIS TANKS -> Matches Gel Electrophoresis Tanks from Reference Catalog: No additional instructions | Pressure seal on the containment unit -> Failure: Failure-hisses | Acrid smoke plume -> Erupts: Thick plume of acrid smoke errupts | CRANE hydraulic arm -> Buckles: The crane begins to buckle under a strange, violet gravitational pull",
+        "flags": [
+            {
+                "flag_type": "SAFETY",
+                "note": "High-risk stunts involving pressure seal failure, smoke, and concussive bursts of pressure.",
+                "severity": 3
+            },
+            {
+                "flag_type": "LOGISTICS",
+                "note": "Complex environment with various equipment and machinery, requiring careful setup and safety measures.",
+                "severity": 1
+            }
+        ]
+    }
+]
