@@ -95,19 +95,21 @@ class MainWindow(QMainWindow):
         self.btn_load_manual = QPushButton("Load Checkpoint...")
         self.btn_load_manual.clicked.connect(self.load_manual_checkpoint)
 
+        self.btn_load_excel = QPushButton("Load Excel Checkpoint...")
+        self.btn_load_excel.clicked.connect(self.load_excel_checkpoint)
+
         self.chk_expand_log = QCheckBox("Expand Log")
         self.chk_expand_log.toggled.connect(self.toggle_log_expansion)
         
         util_row.addWidget(self.btn_load)
         util_row.addWidget(self.btn_load_manual)
+        util_row.addWidget(self.btn_load_excel)
         util_row.addStretch()
         util_row.addWidget(self.chk_expand_log)
         sl.addLayout(util_row)
         
         selection_group.setLayout(sl)
         layout.addWidget(selection_group)
-
-        # ... (rest of your build code for Element Settings, etc.)
 
         # 2 Element Settings (Vertical Reading Grid)
         element_group = QGroupBox("Elements to Extract")
@@ -215,6 +217,14 @@ class MainWindow(QMainWindow):
 
     def _build_review_ui(self):
         layout = QVBoxLayout(self.review_tab)
+
+        # Top Control Bar for Table
+        top_bar = QHBoxLayout()
+        self.chk_wrap = QCheckBox("Wrap Text / Expand Rows")
+        self.chk_wrap.toggled.connect(self.toggle_word_wrap)
+        top_bar.addWidget(self.chk_wrap)
+        top_bar.addStretch()
+        layout.addLayout(top_bar)
         
         self.table = QTableWidget()
         # Set to 32 columns based on your CSV reference
@@ -286,8 +296,15 @@ class MainWindow(QMainWindow):
             "Special Equipment", "Security", "Additional Labor", "Visual Effects", 
             "Mechanical Effects", "Miscellaneous", "Notes"
         ]
-        
+
         for row, scene in enumerate(scenes):
+
+            def create_item(text):
+                val = str(text) if text is not None else ""
+                item = QTableWidgetItem(val)
+                item.setToolTip(val)
+                return item
+            
             # Header & Info (Cols 0-6)
             self.table.setItem(row, 0, QTableWidgetItem(str(scene.scene_number)))
             self.table.setItem(row, 1, QTableWidgetItem(scene.int_ext))
@@ -309,6 +326,10 @@ class MainWindow(QMainWindow):
             # Review Flags - using 'note' and 'flag_type' from your ReviewFlag model
             flag_texts = [f"[{f.flag_type}] {f.note}" for f in scene.flags]
             self.table.setItem(row, 31, QTableWidgetItem(" | ".join(flag_texts)))
+
+            # After filling, if Wrap is enabled, resize immediately
+            if self.chk_wrap.isChecked():
+                self.table.resizeRowsToContents()
 
     def handle_file_selection(self):
         path, _ = QFileDialog.getOpenFileName(self, "Select Script", "", "Scripts (*.pdf *.fdx *.txt *.docx *.doc *.rtf)")
@@ -381,6 +402,88 @@ class MainWindow(QMainWindow):
                 
             except Exception as e:
                 self.log_output.append(f"ERROR: Failed to load: {str(e)}")
+
+    def load_excel_checkpoint(self):
+        """Re-imports an edited Excel file back into the tool for MMS export."""
+        import pandas as pd
+        from src.core.models import Scene, Element
+        
+        path, _ = QFileDialog.getOpenFileName(self, "Select Excel Breakdown", "outputs/", "Excel Files (*.xlsx *.xls)")
+        if not path:
+            return
+
+        try:
+            df = pd.read_excel(path)
+            new_scenes = []
+            
+            # Map of column names to element categories (7 to 29)
+            element_cats = [
+                "Cast Members", "Background Actors", "Stunts", "Vehicles", "Props", "Camera",
+                "Special Effects", "Wardrobe", "Makeup/Hair", "Animals", "Animal Wrangler",
+                "Music", "Sound", "Art Department", "Set Dressing", "Greenery", 
+                "Special Equipment", "Security", "Additional Labor", "Visual Effects", 
+                "Mechanical Effects", "Miscellaneous", "Notes"
+            ]
+
+            for _, row in df.iterrows():
+                # 1. Reconstruct Elements (Existing logic)
+                elements = []
+                for cat in element_cats:
+                    if pd.notna(row.get(cat)):
+                        names = str(row[cat]).split(", ")
+                        for n in names:
+                            if n.strip():
+                                elements.append(Element(name=n.strip(), category=cat))
+
+                # 2. Reconstruct Review Flags
+                from src.core.models import ReviewFlag
+                flags = []
+                flag_raw = str(row.get('Review Flags', ''))
+                if flag_raw and flag_raw != 'nan':
+                    # Split by the separator we used in populate_table
+                    parts = flag_raw.split(" | ")
+                    for p in parts:
+                        # Extract [TYPE] Note
+                        if "]" in p:
+                            f_type = p[p.find("[")+1 : p.find("]")]
+                            f_note = p[p.find("]")+1 :].strip()
+                            flags.append(ReviewFlag(flag_type=f_type, note=f_note, severity=1))
+
+                # 3. Reconstruct Page Math
+                p_whole = 0
+                p_eighths = 0
+                pg_str = str(row.get('Pages', '0/8'))
+                if " " in pg_str:
+                    p_whole = int(pg_str.split(" ")[0])
+                    p_eighths = int(pg_str.split(" ")[1].split("/")[0])
+                elif "/" in pg_str:
+                    p_eighths = int(pg_str.split("/")[0])
+
+                # 4. Create the Scene object
+                scene = Scene(
+                    scene_number=str(row.get('Scene', '0')),
+                    int_ext=str(row.get('Int/Ext', 'INT')),
+                    set_name=str(row.get('Set', 'UNKNOWN')),
+                    day_night=str(row.get('Day/Night', 'DAY')),
+                    pages_whole=p_whole,
+                    pages_eighths=p_eighths,
+                    synopsis=str(row.get('Synopsis', '')),
+                    description=str(row.get('Description', '')),
+                    elements=elements,
+                    continuity_notes=str(row.get('Continuity Notes', '')),
+                    flags=flags, # <--- Now passing the parsed flags list
+                    scene_index=len(new_scenes)
+                )
+                new_scenes.append(scene)
+
+            self.current_scenes = new_scenes
+            self.populate_table(self.current_scenes)
+            self.tabs.setTabEnabled(1, True)
+            self.tabs.setCurrentIndex(1)
+            self.log_output.append(f"SUCCESS: Imported {len(new_scenes)} scenes from Excel.")
+
+        except Exception as e:
+            self.log_output.append(f"ERROR: Excel import failed: {str(e)}")
 
     def start_analysis(self):
         """Prepares config and starts the background worker with optional range filtering."""
@@ -464,6 +567,18 @@ class MainWindow(QMainWindow):
         
         self.log_output.append("SUCCESS: Analysis complete. Data moved to Review Tab.")
         self.pbar.setValue(100)
+
+    def toggle_word_wrap(self, enabled):
+        """Switches between condensed single-line and expanded wrapped text."""
+        self.table.setWordWrap(enabled)
+        
+        if enabled:
+            # Expand: Wrap text and make rows as tall as needed
+            self.table.resizeRowsToContents()
+        else:
+            # Collapse: Force rows back to a standard height (e.g., 30 pixels)
+            for i in range(self.table.rowCount()):
+                self.table.setRowHeight(i, 30)
 
     def handle_export(self):
         """Processes the checked export formats using the DataExporter."""
