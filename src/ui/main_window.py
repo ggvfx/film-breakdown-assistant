@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QPushButton, QLabel, QCheckBox, QComboBox, QProgressBar, 
     QTextEdit, QTableWidget, QFileDialog, QGroupBox, QScrollArea, 
-    QHeaderView, QTableWidgetItem, QDoubleSpinBox, QSpinBox
+    QHeaderView, QTableWidgetItem, QDoubleSpinBox, QSpinBox, QRadioButton, QLineEdit
 )
 from PySide6.QtCore import Qt, QThread, QTimer
 from src.ui.worker import AnalysisWorker
@@ -38,10 +38,9 @@ class MainWindow(QMainWindow):
     def _build_setup_ui(self):
         layout = QVBoxLayout(self.setup_tab)
         layout.setSpacing(15)
-        # Add this line: it forces all widgets to stay at the top of the tab
         layout.setAlignment(Qt.AlignTop)
 
-        # 1 Script Selection & Project Management (Renamed and Grouped)
+        # 1 Script Selection & Project Management
         selection_group = QGroupBox("Script Selection & Project Management")
         sl = QVBoxLayout()
         
@@ -57,20 +56,58 @@ class MainWindow(QMainWindow):
         file_row.addWidget(self.chk_fdx)
         sl.addLayout(file_row)
 
-        # Row 2: Load Button and Log Checkbox
+        # NEW Row: Scene Range Selection (Task 1)
+        range_row = QHBoxLayout()
+        self.rad_all = QRadioButton("Analyze ALL Scenes")
+        self.rad_range = QRadioButton("Analyze RANGE:")
+        self.rad_all.setChecked(True)
+        
+        self.txt_range_from = QLineEdit()
+        self.txt_range_from.setPlaceholderText("From (e.g. 1)")
+        self.txt_range_from.setFixedWidth(100)
+        self.txt_range_from.setEnabled(False) # Disabled unless 'Range' is picked
+        
+        self.txt_range_to = QLineEdit()
+        self.txt_range_to.setPlaceholderText("To (e.g. 15A)")
+        self.txt_range_to.setFixedWidth(100)
+        self.txt_range_to.setEnabled(False)
+
+        # Toggle boxes based on radio choice
+        self.rad_range.toggled.connect(self.txt_range_from.setEnabled)
+        self.rad_range.toggled.connect(self.txt_range_to.setEnabled)
+
+        range_row.addWidget(self.rad_all)
+        range_row.addSpacing(20)
+        range_row.addWidget(self.rad_range)
+        range_row.addWidget(self.txt_range_from)
+        range_row.addWidget(QLabel("-"))
+        range_row.addWidget(self.txt_range_to)
+        range_row.addStretch()
+        sl.addLayout(range_row)
+
+        # Row 2: Load Buttons and Log Checkbox
         util_row = QHBoxLayout()
+        
+        # FIX: Define buttons BEFORE adding them to the layout
         self.btn_load = QPushButton("Load Last Checkpoint")
         self.btn_load.clicked.connect(self.load_last_checkpoint)
+        
+        self.btn_load_manual = QPushButton("Load Checkpoint...")
+        self.btn_load_manual.clicked.connect(self.load_manual_checkpoint)
+
         self.chk_expand_log = QCheckBox("Expand Log")
-        # Logic to expand window down
         self.chk_expand_log.toggled.connect(self.toggle_log_expansion)
+        
         util_row.addWidget(self.btn_load)
+        util_row.addWidget(self.btn_load_manual)
         util_row.addStretch()
         util_row.addWidget(self.chk_expand_log)
         sl.addLayout(util_row)
         
         selection_group.setLayout(sl)
         layout.addWidget(selection_group)
+
+        # ... (rest of your build code for Element Settings, etc.)
 
         # 2 Element Settings (Vertical Reading Grid)
         element_group = QGroupBox("Elements to Extract")
@@ -316,43 +353,99 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.log_output.append(f"ERROR: Failed to load checkpoint: {str(e)}")
 
+    def load_manual_checkpoint(self):
+        """Allows user to browse for a specific JSON checkpoint file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, 
+            "Select Checkpoint", 
+            "outputs/", 
+            "JSON Files (*.json)"
+        )
+        
+        if file_path:
+            self.log_output.append(f"INFO: Loading selected checkpoint: {os.path.basename(file_path)}")
+            
+            from src.core.utils import load_checkpoint
+            try:
+                loaded_scenes = load_checkpoint(file_path)
+                if not loaded_scenes:
+                    self.log_output.append("ERROR: File was empty or invalid.")
+                    return
+                
+                self.current_scenes = loaded_scenes
+                self.populate_table(self.current_scenes)
+                
+                self.tabs.setTabEnabled(1, True)
+                self.tabs.setCurrentIndex(1)
+                self.log_output.append(f"SUCCESS: Loaded {len(loaded_scenes)} scenes.")
+                
+            except Exception as e:
+                self.log_output.append(f"ERROR: Failed to load: {str(e)}")
+
     def start_analysis(self):
-        """Prepares config and starts the background worker."""
+        """Prepares config and starts the background worker with optional range filtering."""
+        # 1. Safety Check
         if not self.current_scenes:
             self.log_output.append("ERROR: No scenes to analyze. Please select a script first.")
             return
 
-        # 1. Sync UI Settings to Config
+        # 2. Identify selected categories
+        active_cats = [c for c, cb in self.cat_boxes.items() if cb.isChecked()]
+        if not active_cats:
+            self.log_output.append("WARNING: No categories selected for extraction.")
+
+        # 3. Sync UI Settings to Config
         self.config.set_performance_level(self.combo_perf.currentText())
         self.config.use_continuity_agent = self.chk_cont.isChecked()
         self.config.use_flag_agent = self.chk_flag.isChecked()
         self.config.temperature = self.spin_temp.value()
         self.config.conservative_mode = self.chk_cons.isChecked()
-        self.config.extract_implied_elements = self.chk_implied.isChecked() # Updated this line
+        self.config.extract_implied_elements = self.chk_implied.isChecked()
         
-        # 2. Identify selected categories
-        active_cats = [c for c, cb in self.cat_boxes.items() if cb.isChecked()]
-        
-        # 3. Setup Worker & Thread
+        # 4. Handle Scene Range Filtering
+        scenes_to_process = self.current_scenes
+        if self.rad_range.isChecked():
+            start_scene = self.txt_range_from.text().strip().upper()
+            end_scene = self.txt_range_to.text().strip().upper()
+            
+            filtered = []
+            active = False
+            for s in self.current_scenes:
+                # Use string comparison for alphanumeric scene numbers
+                curr_num = str(s.scene_number).upper()
+                if curr_num == start_scene: 
+                    active = True
+                if active: 
+                    filtered.append(s)
+                if curr_num == end_scene: 
+                    break
+            
+            if not filtered:
+                self.log_output.append(f"ERROR: Range {start_scene} to {end_scene} not found in current script.")
+                return
+            
+            scenes_to_process = filtered
+            self.log_output.append(f"INFO: Range selected. Processing {len(scenes_to_process)} scenes.")
+
+        # 5. Setup Worker & Thread
         self.btn_run.setEnabled(False)
         self.pbar.setValue(0)
         
         self.worker_thread = QThread()
-        self.worker = AnalysisWorker(self.analyzer, self.current_scenes, active_cats)
+        self.worker = AnalysisWorker(self.analyzer, scenes_to_process, active_cats)
         self.worker.moveToThread(self.worker_thread)
         
-        # 4. Connect Signals
+        # 6. Connect Signals
         self.worker_thread.started.connect(self.worker.run)
         self.worker.log_signal.connect(self.log_output.append)
         
-        # Ensure AnalysisWorker has a progress_signal(int)
         if hasattr(self.worker, 'progress_signal'):
             self.worker.progress_signal.connect(self.pbar.setValue) 
         
         self.worker.finished.connect(self.on_analysis_finished)
         
         self.worker_thread.start()
-        self.log_output.append(f"START: Analyzing {len(self.current_scenes)} scenes...")
+        self.log_output.append(f"START: Analyzing {len(scenes_to_process)} scenes...")
 
     def on_analysis_finished(self, results):
         """Called when AI processing is complete."""

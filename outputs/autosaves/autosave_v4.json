@@ -2,61 +2,351 @@
     {
         "scene_number": "1",
         "int_ext": "INT",
-        "set_name": "RESEARCH LAB",
-        "day_night": "NIGHT",
+        "set_name": "LIVING ROOM",
+        "day_night": "DAY",
         "scene_index": 1,
-        "pages_whole": 1,
+        "pages_whole": 0,
         "pages_eighths": 2,
-        "script_text": "The lab is a sprawling cathedral of glass and steel. \n       A pervasive CHEMICAL SMELL\u2014sharp, like ionized sulfur\u2014\n       hangs in the air. \n\n\n       SIX SCIENTISTS (Background) move with clinical urgency. \n       Two monitor a row of shimmering BEAKERS filled with \n       luminescent sludge. Three others cluster around a \n       battery of humming ULTRACENTRIFUGES. The sixth enters \n       data into a wall-mounted glass interface.\n\n\n       Dominating the center of the room is a massive industrial \n       CRANE. Its hydraulic arm suspends a lead-lined containment \n       unit over a REACTION CHAMBER.\n\n\n       Other props clutter the space: \n       - ELECTRON MICROSCOPES \n       - LIQUID NITROGEN DEWARS (venting cold vapor)\n       - SPECTROMETERS\n       - OSCILLOSCOPES flickering with green waves\n       - VIAL RACKS\n       - BEXTER FLASKS\n       - PETRI DISHES\n       - INCUBATORS\n       - PIPETTES\n       - HAZMAT KITS\n       - GEL ELECTROPHORESIS TANKS.\n\n\n       STUNT SEQUENCE:\n\n\n       Suddenly, a pressure seal on the containment unit \n       FAILURE-HISSES. A thick plume of acrid SMOKE errupts.\n\n\n       TWO STUNT GUARDS in tactical gear rush the platform. \n\n\n       GUARD 1 slides under the swinging arm of the CRANE as \n       the internal alarms scream. \n\n\n       GUARD 2 is thrown back by a concussive burst of pressure, \n       performing a full-body flip onto a stack of equipment \n       crates. \n\n\n       The Scientists dive for cover behind the centrifuges as \n       the crane begins to buckle under a strange, violet \n       gravitational pull.\n\n\n                               DR. ARIS\n                 Don't let the containment drop! If \n                 that seal breaks, the city is gone!\n\n\n       The crane groans. The smoke thickens, turning a deep, \n       unnatural purple.\n\n\n                                               FADE OUT.",
-        "synopsis": "Lab equipment failure",
-        "description": "Scientists work in a lab when equipment fails, causing chaos.",
+        "script_text": "Dust motes dance in the afternoon light. TOBY (7), wearing\n       a oversized camouflage jacket, sits cross-legged on the rug.\n\n       He holds a high-end PROP REPLICA HANDGUN. It looks \n       frighteningly real. He mimics the weight of it, aiming \n       steadily at a framed family photo on the mantel.\n\n                               TOBY\n                 (A whisper)\n                 Bang.\n\n       The hammer of the prop gun clicks back. He pulls the \n       trigger. A plastic snap echoes in the quiet room.\n\n       Outside, through the window, a DOG BARKS aggressively.",
+        "synopsis": "Toby practices with a replica handgun",
+        "description": "Toby sits on the rug, holding a prop replica handgun and aiming at a family photo. He mimics the weight of it and pulls the trigger.",
         "elements": [
             {
-                "name": "SCIENTISTS (6)",
+                "name": "TOBY",
                 "category": "Cast Members",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": "1"
             },
             {
-                "name": "GUARD 1",
-                "category": "Cast Members",
+                "name": "DOG (1)",
+                "category": "Background Actors",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": "1"
             },
             {
-                "name": "GUARD 2",
-                "category": "Cast Members",
-                "source": "explicit",
-                "confidence": 1.0,
-                "count": "1"
-            },
-            {
-                "name": "EQUIPMENT",
-                "category": "Mechanical Effects",
+                "name": "RUG",
+                "category": "Set Dressing",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": ""
             },
             {
-                "name": "LAB",
-                "category": "Art Department",
+                "name": "PROP REPLICA HANDGUN",
+                "category": "Vehicles",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "FAMILY PHOTO",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "HANDGUN",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "FAMILY PHOTO",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "PROP REPLICA HANDGUN",
+                "category": "Special Equipment",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "FAMILY PHOTO",
+                "category": "Miscellaneous",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": ""
             }
         ],
-        "continuity_notes": "ELECTRON MICROSCOPES -> None found in Reference Catalog, but likely matches Scanning Electron Microscopes:  | LIQUID NITROGEN DEWARS (venting cold vapor) -> Matches Liquid Nitrogen Dewars from Reference Catalog: No additional instructions | SPECTROMETERS -> None found in Reference Catalog, but likely matches Mass Spectrometers or other types of Spectrometers:  | OSCILLOSCOPES flickering with green waves -> Matches Oscilloscopes from Reference Catalog: Note the specific color and action | VIAL RACKS -> None found in Reference Catalog, but likely matches Pipette Racks or Vial Holders:  | BEXTER FLASKS -> Matches Erlenmeyer Flasks from Reference Catalog (Note: Bexer is not a standard term): Use Erlenmeyer Flasks | PETRI DISHES -> Matches Petri Dishes from Reference Catalog: No additional instructions | INCUBATORS -> None found in Reference Catalog, but likely matches Bacterial Incubators or other types of incubators:  | PIPETTES -> Matches Pipettes from Reference Catalog: No additional instructions | HAZMAT KITS -> None found in Reference Catalog, but likely matches Standard Hazmat Kits or specific types of Hazmat Kits:  | GEL ELECTROPHORESIS TANKS -> Matches Gel Electrophoresis Tanks from Reference Catalog: No additional instructions | Pressure seal on the containment unit -> Failure: Failure-hisses | Acrid smoke plume -> Erupts: Thick plume of acrid smoke errupts | CRANE hydraulic arm -> Buckles: The crane begins to buckle under a strange, violet gravitational pull",
+        "continuity_notes": "Prop Replica Handgun -> Generic handguns exist in the catalog, but this one is detailed as a 'high-end' replica. Consider referencing Scene 1 for further detail.: Use exact same model of handgun from Scene 1 | hammer of the prop gun -> clicked back: Functioned as expected | plastic snap (from trigger) -> echoed in quiet room: Produced sound",
+        "flags": [
+            {
+                "flag_type": "REGULATORY",
+                "note": "Minors present (TOBY is 7)",
+                "severity": 3
+            },
+            {
+                "flag_type": "WEAPONRY",
+                "note": "Prop replica handgun present",
+                "severity": 3
+            }
+        ]
+    },
+    {
+        "scene_number": "2",
+        "int_ext": "EXT",
+        "set_name": "BACKYARD",
+        "day_night": "DAY",
+        "scene_index": 2,
+        "pages_whole": 0,
+        "pages_eighths": 2,
+        "script_text": "JACK (40s, weary) sits at a weathered picnic table. Laid \n       out on a rag is a BOLT-ACTION RIFLE. \n\n       The DOG, a large German Shepherd, lunges at the length of its \n       chain, barking at the fence line.\n\n                               JACK\n                 Knock it off, Bear!\n\n       Jack slides a cleaning rod through the barrel of the RIFLE. \n       The metallic scrape is rhythmic, cold. He ignores the dog\u2019s \n       distress, focused entirely on the weapon in his hands.",
+        "synopsis": "JACK WORKS ON RIFLE",
+        "description": "Jack sits at a picnic table and works on a bolt-action rifle while his German Shepherd, Bear, barks at the fence line.",
+        "elements": [
+            {
+                "name": "JACK",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BEAR (1)",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BOLT-ACTION RIFLE",
+                "category": "Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "PICNIC TABLE",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "BOLT-ACTION RIFLE",
+                "category": "Vehicles",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "GERMAN SHEPHERD (1)",
+                "category": "Greenery",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(1)"
+            },
+            {
+                "name": "BEAR",
+                "category": "Animals",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "PICNIC TABLE",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "BOLT-ACTION RIFLE",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "PICNIC TABLE",
+                "category": "Miscellaneous",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "BOLT-ACTION RIFLE",
+                "category": "Special Equipment",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "GERMAN SHEPHERD (Bear)",
+                "category": "Camera",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "bolt-action rifle -> Matches Sc 1 PROP REPLICA HANDGUN (same type of object): Use Scene 1 Prop Replica Handgun | dog -> Matches Sc 1 DOG (same type of animal): Use Scene 1 Dog | rifle barrel cleaning rod -> Not in Reference Catalog, but logical presence: Purchase or provide similar item | RIFLE -> N/A:  | DOOR (implied by fence line) -> N/A: ",
+        "flags": [
+            {
+                "flag_type": "WEAPONRY",
+                "note": "BOLT-ACTION RIFLE prop is present",
+                "severity": 3
+            },
+            {
+                "flag_type": "SAFETY",
+                "note": "Physical risks like stunt action may be implied, but none explicitly mentioned.",
+                "severity": 2
+            },
+            {
+                "flag_type": "LOGISTICS",
+                "note": "Animals (GERMAN SHEPHERD) are present on set",
+                "severity": 1
+            }
+        ]
+    },
+    {
+        "scene_number": "3",
+        "int_ext": "EXT",
+        "set_name": "NEIGHBORHOOD",
+        "day_night": "DAY",
+        "scene_index": 3,
+        "pages_whole": 0,
+        "pages_eighths": 3,
+        "script_text": "The sun has dipped lower, casting long, jagged shadows.\n\n       A trash can sits at the curb. Smoke curls from the top. \n       Suddenly, a small burst of orange\u2014a FIRE starts within \n       the discarded papers and debris.\n\n       STUNT SEQUENCE:\n\n       A FIGURE (18) sprints down the sidewalk, pursued by the \n       sound of a distant siren. He reaches a high wooden fence \n       separating the properties.\n\n       He leaps, fingers catching the top rail, but his grip slips \n       on the weathered wood. \n\n       HE FALLS\u2014a hard, flat-back drop from six feet up. \n\n       THUD. He hits the pavement with a sickening groan. He \n       scrambles up, clutching his side, as the fire in the trash \n       can flares, licking the side of the fence.\n\n\n                                               FADE OUT.",
+        "synopsis": "Fire breaks out in trash can",
+        "description": "A figure sprints down the sidewalk, pursued by a siren. He leaps over a fence but falls and hits the pavement.",
+        "elements": [
+            {
+                "name": "FIGURE",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FIRE",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BYSTANDERS (0)",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "SIREN",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FENCE",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "TRASH CAN",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "VAULTING",
+                "category": "Stunts",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "JUMPING",
+                "category": "Stunts",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FALLING",
+                "category": "Stunts",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FENCE",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "PAVEMENT",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "FIGURE",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "SIDEWALK",
+                "category": "Wardrobe",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "FENCE",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "PAVEMENT",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "CAMERA",
+                "category": "Camera",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "SIREN",
+                "category": "Sound",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "trash can -> PROP REPLICA HANDGUN (Sc 1): Use a trash can from Scene 1, but consider the size and condition to match this scene. | fire -> FAMILY PHOTO (Sc 1): This is not an exact match, but it's possible that the fire could be lit using a lighter or matches that are similar to those used in Scene 1. | wooden fence -> PICNIC TABLE (Sc 2): Consider using a picnic table from Scene 2 as it's possible that the set dressing department could use a similar piece of furniture to create the wooden fence. | GERMAN SHEPHERD -> DOG (Sc 1): Since this is not an exact match, but it's possible that a German Shepherd or another large breed dog could be used to create the sound of pursuit. | rubbish and debris -> FAMILY PHOTO (Sc 1): Consider using similar rubbish and debris from Scene 1, but adjust quantities and arrangement to match this scene's trash can. | trash can -> Burned: Fire starts within the discarded papers and debris. | wooden fence -> Wetted: Smoke from the fire in the trash can licks the side of the fence.",
         "flags": [
             {
                 "flag_type": "SAFETY",
-                "note": "High-risk stunts involving pressure seal failure, smoke, and concussive bursts of pressure.",
+                "note": "Stunts involving vaulting, jumping, and falling require a Stunt Coordinator.",
                 "severity": 3
             },
             {
                 "flag_type": "LOGISTICS",
-                "note": "Complex environment with various equipment and machinery, requiring careful setup and safety measures.",
+                "note": "High-complexity environment with fire and sirens may require additional resources.",
                 "severity": 1
             }
         ]
