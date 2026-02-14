@@ -3,15 +3,35 @@
 **Film Breakdown Assistant** is an intelligent production-scheduling utility designed to eliminate the labor-intensive "grunt work" of manual script analysis. By leveraging Local LLMs, the tool provides a security-first environment for sensitive IP, extracting critical production variables; department elements, stunts, intimacy, and safety requirements—directly into industry-standard formats.
 
 ## Project Status
-🚦 **Project Status:** Alpha (Active Development)
-The core logic is currently functional via CLI, utilizing Pydantic for data validation and Pandas for structured output.
-**Current Output:** Automated Excel-based breakdown sheets.
-**Next Milestone:** Implementing .sex (Scheduling Export) support to enable direct, one-click ingestion into Movie Magic Scheduling, eliminating the need for manual data re-entry.
+🚦 **Project Status:** Beta (GUI Integration)
+The core logic has successfully transitioned from CLI to a PySide6 (Qt) Desktop Interface. The tool now supports a full "Human-in-the-Loop" workflow, allowing production staff to orchestrate AI analysis, review results in real-time, and manage long-running extractions.
+**Current Capabilities:**
+* **Intelligent Session Control:** Non-destructive **Stop/Resume** logic that allows users to pause extractions and pick up exactly where the AI left off.
+* **UI-Driven Orchestration:** Real-time logging, sub-step progress tracking, and category-specific extraction toggles.
+* **Persistent State:** JSON-based checkpointing with an automated background rotation system (10-stage rolling autosave).
+* **Project Isolation:** Automatic "Factory Reset" logic when loading new scripts to ensure zero data cross-contamination.
+
+**Next Milestone:** Finalizing the **.sex (Scheduling Export)** support to enable seamless, one-click ingestion into **Movie Magic Scheduling**.
 
 ## Strategic Roadmap
-* **Phase 1 (Complete):** Core multi-format parsing; 4-Pass Agentic pipeline (Harvester, Continuity, Flags); Decoupled export logic with JSON checkpointing.
-* **Phase 2 (Current):** Code refactoring for GUI readiness; Transition to PySide6 (Qt) interface for session management; Implementation of Eco/Power modes.
-* **Phase 3 (Next):** Finalize Movie Magic XML export; Rigorous testing of FDX tag extraction; Iterative prompt tuning for safety/regulatory precision.
+### Phase 1: Core Engine (Complete)
+* Developed the **7-Pass Agentic Pipeline**:
+    * **The Harvester (4-Passes):** Core Narrative, Set/Vehicles, Props/SFX, and Technical Gear.
+    * **Continuity Agent (2-Passes):** Matchmaking (Entity Reconciliation) and Observation (State Tracking).
+    * **Review Flag Agent (1-Pass):** Safety, Risk, and Regulatory Scanning.
+* Established decoupled export logic and Pydantic-validated data models.
+* Implemented multi-format script parsing (PDF, FDX, DOCX, RTF).
+
+### Phase 2: Desktop Interface & State Control (Complete)
+* **GUI Transition:** Rebuilt the interface in **PySide6** with a dual-tab "Setup vs. Review" architecture.
+* **Process Interruption:** Engineered a safe **Kill Switch** that merges partial results into the master list, enabling "Pause/Resume" functionality.
+* **Async Orchestration:** Integrated `QThread` and `asyncio` to maintain a responsive UI and prevent "Event Loop" collisions during local LLM communication.
+* **Visual Polish:** Implemented a hardware-optimized "Performance Mode" selector and a high-visibility, dark-themed Review Grid with adjustable line weights.
+
+### Phase 3: Industry Interoperability (Current)
+* **Movie Magic Integration:** Development of the `.sex` XML exporter to eliminate manual data entry in MMS.
+* **Safety Precision:** Iterative prompt tuning to increase the accuracy of **Safety & Risk** flagging and AD Alerts.
+* **FDX Tag Syncing:** Finalizing logic to map legacy Final Draft "Element Tags" directly to AI-extracted categories for hybrid workflows.
 
 ## 🚀 Overview
 The **Film Breakdown Assistant** is a professional-grade utility designed to eliminate the manual "heavy lifting" of the script breakdown process. By automating the extraction of 80%+ of repetitive "grunt work," it empowers Assistant Directors and Production Managers to shift their focus from rote data entry to high-level logistical strategy and creative problem-solving.
