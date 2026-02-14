@@ -7,12 +7,22 @@ class AnalysisWorker(QObject):
     """The engine that runs the AI in the background."""
     finished = Signal(list)  # Sends the list of processed scenes
     log_signal = Signal(str) # Sends strings to the UI log window
+    progress_signal = Signal(int)
 
     def __init__(self, analyzer, scenes, categories):
         super().__init__()
         self.analyzer = analyzer
         self.scenes = scenes
         self.categories = categories
+
+    def report_progress(self, sub_index, total):
+        """
+        sub_index: float (e.g., 0.5, 1.2, 1.8)
+        total: total number of scenes
+        """
+        percent = int((sub_index / total) * 100)
+        # Clamp to 100 to avoid overflow
+        self.progress_signal.emit(min(percent, 100))
 
     @Slot()
     def run(self):
@@ -32,7 +42,7 @@ class AnalysisWorker(QObject):
         try:
             # This runs your existing analyzer logic
             results = loop.run_until_complete(
-                self.analyzer.run_full_pipeline(self.scenes, self.categories)
+                self.analyzer.run_full_pipeline(self.scenes, self.categories, progress_callback=self.report_progress)
             )
             self.finished.emit(results)
         finally:

@@ -62,7 +62,7 @@
             },
             {
                 "name": "PROP REPLICA HANDGUN",
-                "category": "Special Equipment",
+                "category": "Props",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": ""
@@ -75,17 +75,17 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "Prop Replica Handgun -> Generic handguns exist in the catalog, but this one is detailed as a 'high-end' replica. Consider referencing Scene 1 for further detail.: Use exact same model of handgun from Scene 1 | hammer of the prop gun -> clicked back: Functioned as expected | plastic snap (from trigger) -> echoed in quiet room: Produced sound",
+        "continuity_notes": "Dust motes -> Not found in Reference Catalog: Add to Reference Catalog for future reference (Scene: 1) | Family photo -> Matches Sc 1 Photos, Family Photos: Use Scene 1 Photos, Family Photos | Rug -> Not found in Reference Catalog: Add to Reference Catalog for future reference (Scene: 1) | PROP REPLICA HANDGUN -> Matches Sc 1 Replica Guns, Handguns: Use Scene 1 Replica Guns, Handguns | Mantel -> Not found in Reference Catalog: Add to Reference Catalog for future reference (Scene: 1) | Window -> Not found in Reference Catalog: Add to Reference Catalog for future reference (Scene: 1) | hammer of the prop gun -> clicked back: Functioning as intended | plastic snap -> echoed in the quiet room: Sound effect occurred",
         "flags": [
             {
-                "flag_type": "REGULATORY",
-                "note": "Minors present (TOBY is 7)",
+                "flag_type": "WEAPONRY",
+                "note": "Prop replica handgun present in the scene.",
                 "severity": 3
             },
             {
-                "flag_type": "WEAPONRY",
-                "note": "Prop replica handgun present",
-                "severity": 3
+                "flag_type": "LOGISTICS",
+                "note": "Presence of an animal (dog) outside, which may require additional coordination and planning.",
+                "severity": 1
             }
         ]
     },
@@ -186,22 +186,17 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "bolt-action rifle -> Matches Sc 1 PROP REPLICA HANDGUN (same type of object): Use Scene 1 Prop Replica Handgun | dog -> Matches Sc 1 DOG (same type of animal): Use Scene 1 Dog | rifle barrel cleaning rod -> Not in Reference Catalog, but logical presence: Purchase or provide similar item | RIFLE -> N/A:  | DOOR (implied by fence line) -> N/A: ",
+        "continuity_notes": "RIFLE -> PROP REPLICA HANDGUN (Sc 1): Use Scene 1 Prop Replica Handgun | DOG -> DOG (Sc 1):  | BOLT-ACTION RIFLE -> N/A: None, no physical changes observed. | DOG's chain -> N/A: None, no physical changes observed.",
         "flags": [
             {
                 "flag_type": "WEAPONRY",
-                "note": "BOLT-ACTION RIFLE prop is present",
+                "note": "BOLT-ACTION RIFLE prop in scene",
                 "severity": 3
             },
             {
                 "flag_type": "SAFETY",
-                "note": "Physical risks like stunt action may be implied, but none explicitly mentioned.",
-                "severity": 2
-            },
-            {
-                "flag_type": "LOGISTICS",
-                "note": "Animals (GERMAN SHEPHERD) are present on set",
-                "severity": 1
+                "note": "Dog's distress and potential physical risk to cast and crew",
+                "severity": 3
             }
         ]
     },
@@ -337,17 +332,12 @@
                 "count": ""
             }
         ],
-        "continuity_notes": "trash can -> PROP REPLICA HANDGUN (Sc 1): Use a trash can from Scene 1, but consider the size and condition to match this scene. | fire -> FAMILY PHOTO (Sc 1): This is not an exact match, but it's possible that the fire could be lit using a lighter or matches that are similar to those used in Scene 1. | wooden fence -> PICNIC TABLE (Sc 2): Consider using a picnic table from Scene 2 as it's possible that the set dressing department could use a similar piece of furniture to create the wooden fence. | GERMAN SHEPHERD -> DOG (Sc 1): Since this is not an exact match, but it's possible that a German Shepherd or another large breed dog could be used to create the sound of pursuit. | rubbish and debris -> FAMILY PHOTO (Sc 1): Consider using similar rubbish and debris from Scene 1, but adjust quantities and arrangement to match this scene's trash can. | trash can -> Burned: Fire starts within the discarded papers and debris. | wooden fence -> Wetted: Smoke from the fire in the trash can licks the side of the fence.",
+        "continuity_notes": "trash can -> PROP REPLICA HANDGUN (Sc 1): No exact match, but a similar item exists in the catalog. | fire in trash can -> BOLT-ACTION RIFLE (Sc 2) and PROP REPLICA HANDGUN (Sc 1): Similar production use of fire effect. | trash can -> Burned: Fire starts within the trash can, licking the side of the fence. | wooden fence -> Wetted/Burnt (slightly): The fire in the trash can flares and touches the wooden fence.",
         "flags": [
             {
                 "flag_type": "SAFETY",
-                "note": "Stunts involving vaulting, jumping, and falling require a Stunt Coordinator.",
+                "note": "High-risk stunt sequence involving vaulting, jumping, and falling. Stunt Coordinator Required.",
                 "severity": 3
-            },
-            {
-                "flag_type": "LOGISTICS",
-                "note": "High-complexity environment with fire and sirens may require additional resources.",
-                "severity": 1
             }
         ]
     }

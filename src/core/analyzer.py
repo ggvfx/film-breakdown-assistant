@@ -35,7 +35,8 @@ class ScriptAnalyzer:
         scenes: List[Scene], 
         categories: List[str],
         from_scene: Optional[str] = None,
-        to_scene: Optional[str] = None
+        to_scene: Optional[str] = None,
+        progress_callback: Optional[callable] = None
     ) -> List[Scene]:
         """
         Processes the filtered scene list through the multi-pass AI pipeline.
@@ -50,11 +51,14 @@ class ScriptAnalyzer:
         processed_scenes = []
         total = len(active_scenes)
         
-        for i, scene in enumerate(active_scenes, 1):
+        for i, scene in enumerate(active_scenes, 0):
             if not self.is_running:
                 break
                 
-            print(f"\n>>> [Scene {i}/{total}] Processing Scene {scene.scene_number}...")
+            print(f"\n>>> [Scene {i + 1}/{total}] Processing Scene {scene.scene_number}...")
+
+            # Milestone: Scene Started (20% through this scene)
+            if progress_callback: progress_callback(i + 0.2, total)
             
             # 2. HARVEST (Passes 1-4)
             # We pass a list of one scene to maintain the run_breakdown signature
@@ -63,6 +67,9 @@ class ScriptAnalyzer:
                 continue
             
             current_scene = harvest_results[0]
+
+            # Milestone: Harvest Complete (50% through this scene)
+            if progress_callback: progress_callback(i + 0.5, total)
                 
             # 3. CONTINUITY
             if self.config.use_continuity_agent:
@@ -72,6 +79,9 @@ class ScriptAnalyzer:
                 notes = await self.run_continuity_pass(current_scene, history_str)
                 # This prevents the description from becoming a giant wall of text
                 current_scene.continuity_notes = notes
+
+            # Milestone: Continuity Done (80% through this scene)
+            if progress_callback: progress_callback(i + 0.8, total)
                 
             # 4. HISTORY UPDATE
             # Pass the scene_number so the dictionary can store it
@@ -89,6 +99,9 @@ class ScriptAnalyzer:
                 print(f"      Found {len(flags)} review flags.")
                 
             processed_scenes.append(current_scene)
+
+            # Milestone: Scene Finished (100% through this scene)
+            if progress_callback: progress_callback(i + 1.0, total)
         
         return processed_scenes
     

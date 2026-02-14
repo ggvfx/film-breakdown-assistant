@@ -2,62 +2,367 @@
     {
         "scene_number": "1",
         "int_ext": "INT",
-        "set_name": "RESEARCH LAB",
+        "set_name": "BANK VAULT",
         "day_night": "NIGHT",
         "scene_index": 1,
-        "pages_whole": 1,
-        "pages_eighths": 2,
-        "script_text": "The lab is a sprawling cathedral of glass and steel. \n       A pervasive CHEMICAL SMELL\u2014sharp, like ionized sulfur\u2014\n       hangs in the air. \n\n\n       SIX SCIENTISTS (Background) move with clinical urgency. \n       Two monitor a row of shimmering BEAKERS filled with \n       luminescent sludge. Three others cluster around a \n       battery of humming ULTRACENTRIFUGES. The sixth enters \n       data into a wall-mounted glass interface.\n\n\n       Dominating the center of the room is a massive industrial \n       CRANE. Its hydraulic arm suspends a lead-lined containment \n       unit over a REACTION CHAMBER.\n\n\n       Other props clutter the space: \n       - ELECTRON MICROSCOPES \n       - LIQUID NITROGEN DEWARS (venting cold vapor)\n       - SPECTROMETERS\n       - OSCILLOSCOPES flickering with green waves\n       - VIAL RACKS\n       - BEXTER FLASKS\n       - PETRI DISHES\n       - INCUBATORS\n       - PIPETTES\n       - HAZMAT KITS\n       - GEL ELECTROPHORESIS TANKS.\n\n\n       STUNT SEQUENCE:\n\n\n       Suddenly, a pressure seal on the containment unit \n       FAILURE-HISSES. A thick plume of acrid SMOKE errupts.\n\n\n       TWO STUNT GUARDS in tactical gear rush the platform. \n\n\n       GUARD 1 slides under the swinging arm of the CRANE as \n       the internal alarms scream. \n\n\n       GUARD 2 is thrown back by a concussive burst of pressure, \n       performing a full-body flip onto a stack of equipment \n       crates. \n\n\n       The Scientists dive for cover behind the centrifuges as \n       the crane begins to buckle under a strange, violet \n       gravitational pull.\n\n\n                               DR. ARIS\n                 Don't let the containment drop! If \n                 that seal breaks, the city is gone!\n\n\n       The crane groans. The smoke thickens, turning a deep, \n       unnatural purple.\n\n\n                                               FADE OUT.",
-        "synopsis": "Lab equipment failure",
-        "description": "Scientists work in a lab when equipment fails, causing chaos.",
+        "pages_whole": 0,
+        "pages_eighths": 4,
+        "script_text": "The air is thick with the smell of ozone. LASER GRIDS\u2014                 \n             vibrant, humming webs of red light\u2014crisscross the room,                \n             shorted out by a bypass module sparking on the floor.                  \n                                                                                    \n                                                                                    \n             JAX (32) and MIRA (28) are waist-deep in chaos. STACKS OF              \n             CASH are piled high. Six heavy DUFFEL BAGS sit engorged.               \n                                                                                    \n             Jax cinches the last bag shut. He checks his watch.                    \n                                                                                    \n                       JAX                                                          \n                 Time\u2019s up. The silent alarm just                                   \n                 pinged the precinct.                                               \n                                                                                    \n                                                                                    \n                       MIRA                                                         \n                 Five seconds. I\u2019m wiping the                                       \n                 internal loop.                                                     \n                                                                                    \n             She rips a cable out. The vault door groans.                           \n                                                                                    \n                       JAX                                                          \n                                                                                    \n                 Move. Now.                                                         \n                                                                                    \n             Jax swings two bags over his shoulders. They bolt.",
+        "synopsis": "Vault Heist Underway",
+        "description": "Jax and Mira are in a bank vault, surrounded by laser grids and stacks of cash. They must escape before the silent alarm is triggered.",
         "elements": [
             {
-                "name": "SCIENTISTS (6)",
+                "name": "LASER GRIDS",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(multiple)"
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(multiple)"
+            },
+            {
+                "name": "DUFFEL BAGS (6)",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(6)"
+            },
+            {
+                "name": "JAX",
                 "category": "Cast Members",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": "1"
             },
             {
-                "name": "GUARD 1",
+                "name": "MIRA",
                 "category": "Cast Members",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": "1"
             },
             {
-                "name": "GUARD 2",
-                "category": "Cast Members",
-                "source": "explicit",
-                "confidence": 1.0,
-                "count": "1"
-            },
-            {
-                "name": "EQUIPMENT",
+                "name": "LASER GRIDS",
                 "category": "Mechanical Effects",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": ""
             },
             {
-                "name": "LAB",
-                "category": "Art Department",
+                "name": "STACKS OF CASH",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "LASER GRIDS",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "LASER GRIDS",
+                "category": "Special Equipment",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "STACKS OF CASH",
+                "category": "Miscellaneous",
                 "source": "explicit",
                 "confidence": 1.0,
                 "count": ""
             }
         ],
-        "continuity_notes": "ELECTRON MICROSCOPES -> None found in Reference Catalog, but likely matches Scanning Electron Microscopes:  | LIQUID NITROGEN DEWARS (venting cold vapor) -> Matches Liquid Nitrogen Dewars from Reference Catalog: No additional instructions | SPECTROMETERS -> None found in Reference Catalog, but likely matches Mass Spectrometers or other types of Spectrometers:  | OSCILLOSCOPES flickering with green waves -> Matches Oscilloscopes from Reference Catalog: Note the specific color and action | VIAL RACKS -> None found in Reference Catalog, but likely matches Pipette Racks or Vial Holders:  | BEXTER FLASKS -> Matches Erlenmeyer Flasks from Reference Catalog (Note: Bexer is not a standard term): Use Erlenmeyer Flasks | PETRI DISHES -> Matches Petri Dishes from Reference Catalog: No additional instructions | INCUBATORS -> None found in Reference Catalog, but likely matches Bacterial Incubators or other types of incubators:  | PIPETTES -> Matches Pipettes from Reference Catalog: No additional instructions | HAZMAT KITS -> None found in Reference Catalog, but likely matches Standard Hazmat Kits or specific types of Hazmat Kits:  | GEL ELECTROPHORESIS TANKS -> Matches Gel Electrophoresis Tanks from Reference Catalog: No additional instructions | Pressure seal on the containment unit -> Failure: Failure-hisses | Acrid smoke plume -> Erupts: Thick plume of acrid smoke errupts | CRANE hydraulic arm -> Buckles: The crane begins to buckle under a strange, violet gravitational pull",
+        "continuity_notes": "Laser Grids -> Exact match from Reference Catalog: Use Scene 1 Laser Grids | Bypass Module -> Exact match from Reference Catalog: Use a functional Bypass Module | Cash Stacks -> No exact match in Reference Catalog, but likely to be Cash ( generic noun): Verify Cash Stacks are consistent with previous scene | LASER GRIDS\u2014vibrant, humming webs of red light -> shorted out by a bypass module sparking on the floor: Broken",
         "flags": [
             {
                 "flag_type": "SAFETY",
-                "note": "High-risk stunts involving pressure seal failure, smoke, and concussive bursts of pressure.",
+                "note": "Physical risks like specialized movement (e.g. vaulting) and high-impact stunts.",
+                "severity": 3
+            }
+        ]
+    },
+    {
+        "scene_number": "2",
+        "int_ext": "INT",
+        "set_name": "BANK LOBBY",
+        "day_night": "NIGHT",
+        "scene_index": 2,
+        "pages_whole": 0,
+        "pages_eighths": 4,
+        "script_text": "The lobby is a cavern of marble and shadow.                            \n                                                                                    \n                                                                                    \n             AT THE TELLER WINDOW                                                   \n                                                                                    \n             Jax vaults over the mahogany counter, sliding across the               \n             polished wood. He drops the bags on the other side.                    \n                                                                                    \n             BY THE FRONT DOOR                                                      \n                                                                                    \n             Mira presses her back against the glass. Outside, blue and             \n                                                                                    \n             red lights pulse against the rain-slicked pavement.                    \n                                                                                    \n                       MIRA                                                         \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                                                                                    \n                 We have a problem. They beat the                                   \n                 timer.",
+        "synopsis": "Jax vaults over counter",
+        "description": "Jax vaults over mahogany counter, sliding across polished wood.",
+        "elements": [
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BYSTANDERS (0)",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "VAULTING",
+                "category": "Stunts",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MAHOGANY COUNTER",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLISHED WOOD FLOOR",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "MAHOGANY COUNTER",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLISHED WOOD",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "marble -> Category BACKGROUND ACTORS: marble (Sc 1): Use Scene 1 Marble | mahogany counter -> Use generic noun and match with Category SET DRESSING: mahogany furniture (Sc 1): Use Scene 1 Mahogany Furniture | polished wood -> Use generic noun and match with Category BACKGROUND ACTORS: polished wood floor (Sc 1): Use Scene 1 Polished Wood Floor | bags -> dropped: They were placed on the other side of the counter. | glass at front door -> untouched: Mira is pressing her back against it, implying that it has not been affected physically.",
+        "flags": [
+            {
+                "flag_type": "SAFETY",
+                "note": "VAULTING stunt performed by Jax",
                 "severity": 3
             },
             {
                 "flag_type": "LOGISTICS",
-                "note": "Complex environment with various equipment and machinery, requiring careful setup and safety measures.",
+                "note": "Weather effect: rain on the pavement",
                 "severity": 1
+            }
+        ]
+    },
+    {
+        "scene_number": "3",
+        "int_ext": "INT",
+        "set_name": "BANK LOBBY",
+        "day_night": "NIGHT",
+        "scene_index": 3,
+        "pages_whole": 0,
+        "pages_eighths": 1,
+        "script_text": "The lobby is bathed in the strobe-light effect of police               \n             cruisers. Jax and Mira crouch behind a marble pillar.                  \n                                                                                    \n                                                                                    \n                       JAX                                                          \n                 On three, we blow the mag-locks.                                   \n                                                                                    \n             Jax clicks a detonator. BOOM. The glass doors SHATTER.",
+        "synopsis": "Police cruisers light up lobby",
+        "description": "Jax and Mira crouch behind a pillar, waiting to blow the mag-locks.",
+        "elements": [
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MIRA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "PILLAR",
+                "category": "Set Dressing",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "MAG-LOCKS",
+                "category": "Props",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "MAG-LOCKS",
+                "category": "Sound",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "police cruisers -> STACKS OF CASH (Sc 1): Use Scene 1 Stacks of Cash, but change lighting color to strobe-light effect | marble pillar -> LASER GRIDS (Sc 1) - Incorrect match: marble not mentioned in Ref Catalog. However, as a background element, it should be noted.: Note presence of marble pillar for future continuity | detonator -> STACKS OF CASH (Sc 1): Use Scene 1 Duffel Bags as detonator prop, and swap with one from Sc 1 Stacks of Cash | Glass doors -> Shattered: BOOM. The glass doors SHATTER.",
+        "flags": [
+            {
+                "flag_type": "SAFETY",
+                "note": "Detonator use and shattering glass doors. Potential for injury.",
+                "severity": 3
+            },
+            {
+                "flag_type": "WEAPONRY",
+                "note": "Explosives (detonator) used in scene.",
+                "severity": 3
+            }
+        ]
+    },
+    {
+        "scene_number": "4",
+        "int_ext": "EXT",
+        "set_name": "BANK",
+        "day_night": "NIGHT",
+        "scene_index": 4,
+        "pages_whole": 0,
+        "pages_eighths": 4,
+        "script_text": "Glass crunches under boots. TWENTY BYSTANDERS and POLICE               \n             OFFICERS scatter for cover.                                            \n                                                                                    \n             FIVE VEHICLES dominate the street: FOUR POLICE CRUISERS                \n             forming a barricade and a matte-black GETAWAY VAN.                     \n                                                                                    \n                       OFFICER RIVERA                                               \n                                                                                    \n                 DROP THE BAGS! HANDS IN THE AIR!                                   \n                                                                                    \n             Jax hurls a flash-bang. WHITE OUT.                                     \n                                                                                    \n             AT THE GETAWAY VAN                                                     \n                                                                                    \n             The side door slides open. Mira tosses her bags in. Jax                \n             dives in after her as bullets PING off the armor.                      \n                                                                                    \n                                                                                    \n             The van screeches forward, fishtailing into the night.                 \n                                                                                    \n                       JAX                                                          \n                 Told you we\u2019d make the exit.                                       \n                                                                                    \n                              FADE OUT.",
+        "synopsis": "GETAWAY VAN ESCAPE",
+        "description": "Jax and Mira escape in a getaway van, pursued by police.",
+        "elements": [
+            {
+                "name": "TWENTY BYSTANDERS",
+                "category": "Background Actors",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(20)"
+            },
+            {
+                "name": "POLICE OFFICERS",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FIVE VEHICLES",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(5)"
+            },
+            {
+                "name": "FOUR POLICE CRUISERS",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "(4)"
+            },
+            {
+                "name": "GETAWAY VAN",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "OFFICER RIVERA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "JAX",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "MIRA",
+                "category": "Cast Members",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "BULLETS",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "FLASH-BANG",
+                "category": "Background Objects",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": "1"
+            },
+            {
+                "name": "GETAWAY VAN",
+                "category": "Vehicles",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLICE VEHICLES",
+                "category": "Vehicles",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "GETAWAY VAN",
+                "category": "Special Equipment",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            },
+            {
+                "name": "POLICE",
+                "category": "Security",
+                "source": "explicit",
+                "confidence": 1.0,
+                "count": ""
+            }
+        ],
+        "continuity_notes": "Glass -> Polished Wood Floor (Sc 2): Use Scene 2 Polished Wood Floor | Bags -> Duffel Bags (Sc 1): Matches Sc 1 Duffel Bags | Police Cruisers -> POLISHED WOOD (Sc 2) and MAHOGANY COUNTER (Sc 2): Use Scene 2 Polished Wood and Mahogany Counter for cruisers | MAG-LOCKS -> Scene 3 MAG-LOCKS: Use Scene 3 MAG-LOCKS | Glass -> Shattered: Crunches under boots | Bags -> Tossed in the van: Mira tosses her bags in. Jax dives in after her",
+        "flags": [
+            {
+                "flag_type": "LOGISTICS",
+                "note": "High-complexity environment: large crowd (TWENTY BYSTANDERS), police officers, and vehicle coordination.",
+                "severity": 1
+            },
+            {
+                "flag_type": "WEAPONRY",
+                "note": "Firearms (bullets PING off the armor) and explosives (flash-bang).",
+                "severity": 3
+            },
+            {
+                "flag_type": "SAFETY",
+                "note": "Stunts: diving in after someone, fishtailing into the night.",
+                "severity": 3
             }
         ]
     }

@@ -29,7 +29,7 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         self.current_scenes = [] # Populated after file selection/parsing
         
         self.setWindowTitle("Film Script AI Breakdown Tool")
-        self.resize(1200, 850)
+        self.resize(700, 720)
 
         # Main Tab Widget
         self.tabs = QTabWidget()
@@ -50,32 +50,15 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         layout.setSpacing(15)
         layout.setAlignment(Qt.AlignTop)
 
-        # 1 Script Selection & Project Management
-        selection_group = QGroupBox("Script Selection & Project Management")
-        sl = QVBoxLayout()
-        
-        # Row 1: File Button and Path
-        file_row = QHBoxLayout()
-        self.btn_select = QPushButton("Select Script File")
-        self.btn_select.clicked.connect(self.handle_file_selection)
-        self.lbl_path = QLabel("No file selected...")
-        self.chk_fdx = QCheckBox("Extract Final Draft Tags")
-        self.chk_fdx.setVisible(False)
-        file_row.addWidget(self.btn_select)
-        file_row.addWidget(self.lbl_path, 1)
-        file_row.addWidget(self.chk_fdx)
-        sl.addLayout(file_row)
-
-        # NEW Row: Scene Range Selection (Task 1)
-        range_row = QHBoxLayout()
-        self.rad_all = QRadioButton("Analyze ALL Scenes")
-        self.rad_range = QRadioButton("Analyze RANGE:")
+        # --- 0. PRE-INITIALIZE WIDGETS ---
+        self.rad_all = QRadioButton("All Scenes")
+        self.rad_range = QRadioButton("Scene Range:")
         self.rad_all.setChecked(True)
         
         self.txt_range_from = QLineEdit()
         self.txt_range_from.setPlaceholderText("From (e.g. 1)")
         self.txt_range_from.setFixedWidth(100)
-        self.txt_range_from.setEnabled(False) # Disabled unless 'Range' is picked
+        self.txt_range_from.setEnabled(False)
         
         self.txt_range_to = QLineEdit()
         self.txt_range_to.setPlaceholderText("To (e.g. 15A)")
@@ -86,33 +69,51 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         self.rad_range.toggled.connect(self.txt_range_from.setEnabled)
         self.rad_range.toggled.connect(self.txt_range_to.setEnabled)
 
-        range_row.addWidget(self.rad_all)
-        range_row.addSpacing(20)
-        range_row.addWidget(self.rad_range)
-        range_row.addWidget(self.txt_range_from)
-        range_row.addWidget(QLabel("-"))
-        range_row.addWidget(self.txt_range_to)
-        range_row.addStretch()
-        sl.addLayout(range_row)
+        # --- 1 Production Setup ---
+        selection_group = QGroupBox("Production Setup")
+        sl = QVBoxLayout()
+        sl.setSpacing(10) 
+        
+        # Row 1: File Button and Path
+        file_row = QHBoxLayout()
+        self.btn_select = QPushButton("Select Script File")
+        self.btn_select.setToolTip("Select a PDF, FDX, RTF, or DOCX script file.") # Tooltip
+        self.btn_select.clicked.connect(self.handle_file_selection)
+        self.lbl_path = QLabel("No file selected...")
+        self.chk_fdx = QCheckBox("Extract Final Draft Tags")
+        self.chk_fdx.setVisible(False)
+        file_row.addWidget(self.btn_select)
+        file_row.addWidget(self.lbl_path, 1)
+        file_row.addWidget(self.chk_fdx)
+        sl.addLayout(file_row)
+
+        sl.addSpacing(10) # Minimal Vertical Spacer (Requirement 2b)
 
         # Row 2: Load Buttons and Log Checkbox
         util_row = QHBoxLayout()
         
-        # FIX: Define buttons BEFORE adding them to the layout
+        # Define buttons
         self.btn_load = QPushButton("Load Last Checkpoint")
+        self.btn_load.setToolTip("Quickly resume the most recent analysis session.") # Tooltip
         self.btn_load.clicked.connect(self.load_last_checkpoint)
         
         self.btn_load_manual = QPushButton("Load Checkpoint...")
+        self.btn_load_manual.setToolTip("Browse for a specific JSON checkpoint.") # Tooltip
         self.btn_load_manual.clicked.connect(self.load_manual_checkpoint)
 
         self.btn_load_excel = QPushButton("Load Excel Checkpoint...")
+        self.btn_load_excel.setToolTip("Re-import edited Excel data.") # Tooltip
         self.btn_load_excel.clicked.connect(self.load_excel_checkpoint)
 
         self.chk_expand_log = QCheckBox("Expand Log")
+        self.chk_expand_log.setToolTip("Show or hide the technical processing log.") # Tooltip
         self.chk_expand_log.toggled.connect(self.toggle_log_expansion)
         
+        # Add with spacing
         util_row.addWidget(self.btn_load)
+        util_row.addSpacing(15) 
         util_row.addWidget(self.btn_load_manual)
+        util_row.addSpacing(15)
         util_row.addWidget(self.btn_load_excel)
         util_row.addStretch()
         util_row.addWidget(self.chk_expand_log)
@@ -121,59 +122,121 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         selection_group.setLayout(sl)
         layout.addWidget(selection_group)
 
-        # 2 Element Settings (Vertical Reading Grid)
-        element_group = QGroupBox("Elements to Extract")
+        # --- 2. Extraction Selection ---
+        element_group = QGroupBox("Extraction Selection")
         ext_v = QVBoxLayout()
+        ext_v.setSpacing(15)
+
+        range_l = QHBoxLayout()
+        range_label = QLabel("Analysis Range:")
+        range_label.setToolTip("Choose whether to analyze the entire script or a specific segment.")
+        
+        self.rad_all.setText("All Scenes")
+        self.rad_range.setText("Scene Range:")
+        
+        range_l.addWidget(range_label)
+        range_l.addWidget(self.rad_all)
+        range_l.addSpacing(10)
+        range_l.addWidget(self.rad_range)
+        range_l.addWidget(self.txt_range_from)
+        range_l.addWidget(QLabel("-"))
+        range_l.addWidget(self.txt_range_to)
+        range_l.addStretch()
+        ext_v.addLayout(range_l)
+
+        # Scroll area for categories
         scroll = QScrollArea()
         scroll_content = QWidget()
         self.cat_grid = QGridLayout(scroll_content)
+
+        self.cat_grid.setHorizontalSpacing(10) 
+        self.cat_grid.setVerticalSpacing(5)
         
-        # Grid math for Vertical Reading
         rows_desired = 8 
         self.cat_boxes = {}
         for i, cat in enumerate(MMS_CATEGORIES):
             cb = QCheckBox(cat)
+            cb.setToolTip(f"Extract elements for the {cat} category.")
             cb.setChecked(True)
             self.cat_boxes[cat] = cb
             self.cat_grid.addWidget(cb, i % rows_desired, i // rows_desired)
+
+        self.cat_grid.setColumnStretch(3, 1)
             
         scroll.setWidget(scroll_content)
         scroll.setWidgetResizable(True)
         scroll.setMaximumHeight(220)
+        scroll.setMaximumWidth(600)
         ext_v.addWidget(scroll)
 
-        # Agent Toggles
+        # Agent Toggles - Fixed the 'sea of grey' by anchoring left
         agent_l = QHBoxLayout()
+        agent_l.setAlignment(Qt.AlignLeft)
         self.chk_cont = QCheckBox("Run Continuity Agent")
+        self.chk_cont.setToolTip("Tracks items across scenes for script consistency.")
         self.chk_flag = QCheckBox("Run Review Flag Agent")
+        self.chk_flag.setToolTip("Scans for safety hazards and production risks.")
+        
         self.chk_cont.setChecked(self.config.use_continuity_agent)
         self.chk_flag.setChecked(self.config.use_flag_agent)
-        agent_l.addWidget(self.chk_cont); agent_l.addWidget(self.chk_flag)
+        
+        agent_l.addWidget(self.chk_cont)
+        agent_l.addSpacing(40) # Gap between agents
+        agent_l.addWidget(self.chk_flag)
+        agent_l.addStretch() # This removes the floating 'sea of grey'
         ext_v.addLayout(agent_l)
+        
         element_group.setLayout(ext_v)
         layout.addWidget(element_group)
 
-        # 3 Technical Settings
+        # --- 3. Technical Settings (Stacked & Aligned) ---
         tech_group = QGroupBox("Technical Settings")
         tl = QVBoxLayout()
-        
-        # Top Row: Temp, Conservative, Implied
-        top_row = QHBoxLayout()
-        top_row.addWidget(QLabel("Temperature:"))
-        self.spin_temp = QDoubleSpinBox()
-        self.spin_temp.setRange(0.0, 1.0); self.spin_temp.setSingleStep(0.1); self.spin_temp.setValue(0.0)
-        self.chk_cons = QCheckBox("Conservative Mode")
-        self.chk_implied = QCheckBox("Extract Implied")
-        self.chk_cons.setChecked(self.config.conservative_mode)
-        top_row.addWidget(self.spin_temp); top_row.addWidget(self.chk_cons); top_row.addWidget(self.chk_implied)
-        tl.addLayout(top_row)
+        tl.setSpacing(12)
 
-        # Bottom Row: Performance
+        # Row 1: Model Temperature
+        temp_row = QHBoxLayout()
+        temp_label = QLabel("Model Temperature:")
+        temp_label.setToolTip("Controls randomness: 0.0 is deterministic, 1.0 is highly creative.")
+        
+        self.spin_temp = QDoubleSpinBox()
+        self.spin_temp.setRange(0.0, 1.0)
+        self.spin_temp.setSingleStep(0.1)
+        self.spin_temp.setValue(self.config.temperature)
+        self.spin_temp.setFixedWidth(150) # Fixed width for alignment
+        
+        temp_row.addWidget(temp_label)
+        temp_row.addWidget(self.spin_temp)
+        temp_row.addStretch() # Anchors to left
+        tl.addLayout(temp_row)
+
+        # Row 2: Checkboxes (Stacked between Temp and Performance)
+        check_row = QHBoxLayout()
+        self.chk_cons = QCheckBox("Conservative Mode")
+        self.chk_cons.setToolTip("Prioritizes accuracy; AI will only extract elements explicitly named in text.")
+        self.chk_cons.setChecked(self.config.conservative_mode)
+
+        self.chk_implied = QCheckBox("Extract Implied")
+        self.chk_implied.setToolTip("Allows AI to extract logical but unnamed elements (e.g., 'Table' in a 'Dining Room').")
+        self.chk_implied.setChecked(self.config.extract_implied_elements)
+        
+        check_row.addWidget(self.chk_cons)
+        check_row.addSpacing(20)
+        check_row.addWidget(self.chk_implied)
+        check_row.addStretch()
+        tl.addLayout(check_row)
+
+        # Row 3: Performance Level
         perf_row = QHBoxLayout()
+        perf_label = QLabel("Performance Level:")
+        perf_label.setToolTip("Determines how many CPU threads are dedicated to the AI processing.")
+        
         self.combo_perf = QComboBox()
         self.combo_perf.addItems(["Eco", "Power", "Turbo", "Max"])
         self.combo_perf.setCurrentText(self.config.performance_mode)
-        perf_row.addWidget(QLabel("Performance Level:"))
+        self.combo_perf.setFixedWidth(150) # Fixed width to align with spinbox row
+        
+        perf_row.addWidget(perf_label)
         perf_row.addWidget(self.combo_perf)
         perf_row.addStretch()
         tl.addLayout(perf_row)
