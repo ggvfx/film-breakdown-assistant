@@ -45,6 +45,13 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         self._build_setup_ui()
         self._build_review_ui()
 
+    def reset_for_new_project(self):
+        """Factory reset for UI when a new script is loaded."""
+        self.table.setRowCount(0)      # Wipes the review table
+        self.log_output.clear()        # Clears the log
+        self.pbar.setValue(0)          # Resets progress
+        self.tabs.setTabEnabled(1, False) # Locks Review tab until analyzed
+
     def _build_setup_ui(self):
         layout = QVBoxLayout(self.setup_tab)
         layout.setSpacing(15)
@@ -253,6 +260,7 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
             QPushButton:hover { background-color: #2e7d32; }
         """)
         self.btn_run.clicked.connect(self.start_analysis)
+        self.btn_run.setToolTip("Begin the AI-powered breakdown of the selected script range.")
         
         # 5. Centered Progress Bar
         self.pbar = QProgressBar()
@@ -313,6 +321,19 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.table.setWordWrap(True)
         layout.addWidget(self.table)
+        self.table.setShowGrid(True)
+        self.table.setStyleSheet("""
+            QTableWidget {
+                gridline-color: #555555; /* Light grey lines */
+                background-color: #2b2b2b;
+            }
+            QHeaderView::section {
+                background-color: #3d3d3d;
+                color: white;
+                padding: 4px;
+                border: 1px solid #555555;
+            }
+        """)
 
         # Bottom Bar
         bot = QHBoxLayout()

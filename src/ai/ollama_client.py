@@ -19,6 +19,11 @@ class OllamaClient:
     def __init__(self, model_name: str = "llama3.2"):
         self.model_name = model_name
         # Reuse the same client instance for better performance
+        #self._client = ollama.AsyncClient()
+        self._client = None
+
+    def reset_session(self):
+        """Re-initializes the async client for the current event loop."""
         self._client = ollama.AsyncClient()
 
     async def generate_breakdown(self, prompt: str, options: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
@@ -32,6 +37,9 @@ class OllamaClient:
         Returns:
             Optional[Dict]: The parsed JSON response or None if the call fails.
         """
+        if self._client is None:
+            self.reset_session()
+            
         try:
             response = await self._client.generate(
                 model=self.model_name,

@@ -29,6 +29,10 @@ class AnalysisWorker(QObject):
         """Entry point for the thread."""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+
+        # Reset the Ollama client session for new loop
+        if hasattr(self.analyzer, 'client'):
+            self.analyzer.client.reset_session()
         
         # This captures 'print' statements and sends them to the UI
         original_print = builtins.print

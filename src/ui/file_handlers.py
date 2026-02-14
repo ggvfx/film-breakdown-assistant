@@ -12,9 +12,34 @@ from src.core.models import Scene, Element, ReviewFlag
 from src.core.utils import save_checkpoint, load_checkpoint
 
 class FileHandlerMixin:
+
+    def reset_ui_and_data(self):
+        """Wipes all previous state to prevent cross-contamination between scripts."""
+        # 1. Clear Data
+        self.current_scenes = []
+        
+        # 2. Reset UI Elements
+        if hasattr(self, 'table'):
+            self.table.setRowCount(0)
+        self.log_output.clear()
+        self.pbar.setValue(0)
+        
+        # 3. Reset Engine Flag
+        if hasattr(self, 'analyzer'):
+            self.analyzer.is_running = True
+            
+        # 4. Lock Review Tab until fresh analysis is done
+        self.tabs.setTabEnabled(1, False)
+
     def handle_file_selection(self):
         path, _ = QFileDialog.getOpenFileName(self, "Select Script", "", "Scripts (*.pdf *.fdx *.txt *.docx *.doc *.rtf)")
         if path:
+            # If the AI is currently running, stop it before loading a new script
+            if hasattr(self, 'worker_thread') and self.worker_thread.isRunning():
+                self.stop_analysis() 
+                self.worker_thread.wait() # Wait for the kill switch to finish
+
+            self.reset_for_new_project()
             self.lbl_path.setText(path)
             # This is Step 1 from your original main.py:
             raw_text = self.parser.load_script(path, self.config)
@@ -36,6 +61,9 @@ class FileHandlerMixin:
             return
 
         latest_file = max(files, key=os.path.getctime)
+
+        # FACTORY RESET BEFORE LOADING
+        self.reset_ui_and_data()
         self.log_output.append(f"INFO: Loading checkpoint: {latest_file}")
 
         # 2. Use your existing utils logic to load the data
@@ -62,6 +90,7 @@ class FileHandlerMixin:
         )
         
         if file_path:
+            self.reset_ui_and_data()
             self.log_output.append(f"INFO: Loading selected checkpoint: {os.path.basename(file_path)}")
             
             try:
@@ -85,6 +114,8 @@ class FileHandlerMixin:
         path, _ = QFileDialog.getOpenFileName(self, "Select Excel Breakdown", "outputs/", "Excel Files (*.xlsx *.xls)")
         if not path:
             return
+        
+        self.reset_ui_and_data()
 
         try:
             df = pd.read_excel(path)

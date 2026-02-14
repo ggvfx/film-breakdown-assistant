@@ -10,10 +10,27 @@ from src.ui.worker import AnalysisWorker
 class AnalysisHandlerMixin:
     def start_analysis(self):
         """Prepares config and starts the background worker with optional range filtering."""
+
+        # --- KILL SWITCH LOGIC ---
+        # If worker exists and thread is running, this click means "STOP"
+        if hasattr(self, 'worker_thread') and self.worker_thread.isRunning():
+            self.stop_analysis()
+            return
+        
         # 1. Safety Check
         if not self.current_scenes:
             self.log_output.append("ERROR: No scenes to analyze. Please select a script first.")
             return
+        
+        # Ensure threads from previous script run are completely dead before starting.
+        if hasattr(self, 'worker_thread'):
+            if self.worker_thread.isRunning():
+                self.worker_thread.quit()
+                self.worker_thread.wait()
+        
+        # Reset Analyzer engine
+        if hasattr(self, 'analyzer'):
+            self.analyzer.is_running = True
 
         # 2. Identify selected categories
         active_cats = [c for c, cb in self.cat_boxes.items() if cb.isChecked()]
@@ -53,9 +70,26 @@ class AnalysisHandlerMixin:
             scenes_to_process = filtered
             self.log_output.append(f"INFO: Range selected. Processing {len(scenes_to_process)} scenes.")
 
+        scenes_to_process = [s for s in scenes_to_process if not s.synopsis or s.synopsis.strip() == ""]
+
+        if not scenes_to_process:
+            self.log_output.append("INFO: All scenes in the selected range have already been analyzed.")
+            return
+
+        self.expected_count = len(scenes_to_process)
+
         # 5. Setup Worker & Thread
-        self.btn_run.setEnabled(False)
+        self.btn_run.setText("STOP EXTRACTION")
+        self.btn_run.setStyleSheet("""
+            QPushButton { background-color: #b71c1c; color: white; border-radius: 5px; font-weight: bold; font-size: 14px; }
+            QPushButton:hover { background-color: #d32f2f; }
+        """)
         self.pbar.setValue(0)
+
+        # Ensure old thread is fully dead before starting new one
+        if hasattr(self, 'worker_thread') and self.worker_thread.isRunning():
+            self.worker_thread.quit()
+            self.worker_thread.wait()
         
         self.worker_thread = QThread()
         self.worker = AnalysisWorker(self.analyzer, scenes_to_process, active_cats)
@@ -73,20 +107,49 @@ class AnalysisHandlerMixin:
         self.worker_thread.start()
         self.log_output.append(f"START: Analyzing {len(scenes_to_process)} scenes...")
 
+    def stop_analysis(self):
+        """Sends the stop signal to the analyzer."""
+        if hasattr(self, 'analyzer'):
+            self.analyzer.stop() # Sets is_running to False in the core
+            self.log_output.append("\n!!! STOP SIGNAL SENT. Finishing current scene and exiting...")
+            self.btn_run.setEnabled(False) # Prevent multiple clicks while winding down
+
     def on_analysis_finished(self, results):
-        """Called when AI processing is complete."""
+        """Called when AI processing is complete (or stopped)."""
+        # Reset Button to RUN mode
         self.btn_run.setEnabled(True)
+        self.btn_run.setText("RUN")
+        self.btn_run.setStyleSheet("""
+            QPushButton { background-color: #424242; color: white; border-radius: 5px; font-weight: bold; font-size: 14px; }
+            QPushButton:hover { background-color: #2e7d32; }
+        """)
         self.worker_thread.quit()
-        
-        # Update memory with the analyzed scenes
-        self.current_scenes = results
-        
-        # Fill the table
-        self.populate_table(self.current_scenes)
-        
-        # Unlock the review tab and switch to it
-        self.tabs.setTabEnabled(1, True)
-        self.tabs.setCurrentIndex(1) 
-        
-        self.log_output.append("SUCCESS: Analysis complete. Data moved to Review Tab.")
-        self.pbar.setValue(100)
+        self.worker_thread.wait()
+
+        # Only update if we actually got data back
+        if results:
+            # Create a lookup map for the processed scenes
+            result_map = {str(s.scene_number): s for s in results}
+            
+            # Update only the scenes that were processed in the original list
+            for i, original_scene in enumerate(self.current_scenes):
+                scene_key = str(original_scene.scene_number)
+                if scene_key in result_map:
+                    self.current_scenes[i] = result_map[scene_key]
+            
+            # Now fill the table with the full, updated master list
+            self.populate_table(self.current_scenes)
+            
+            # UI Feedback
+            self.tabs.setTabEnabled(1, True)
+            self.tabs.setCurrentIndex(1) 
+
+            if len(results) >= getattr(self, 'expected_count', 0):
+                self.pbar.setValue(100)
+                self.log_output.append(f"SUCCESS: Analysis complete. {len(results)} scenes updated.")
+            else:
+                # If stopped, the bar remains at its last reported position
+                self.log_output.append(f"STOPPED: Partial results saved ({len(results)}/{self.expected_count} scenes).")
+        else:
+            self.log_output.append("INFO: Analysis ended with no new data.")
+            self.pbar.setValue(0)
