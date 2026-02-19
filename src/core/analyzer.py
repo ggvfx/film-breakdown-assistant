@@ -158,7 +158,7 @@ class ScriptAnalyzer:
         # 2. PASS 1 (CORE) - Must run first to generate the scene description
         # We call the core prompt directly here to maintain your current variables
         async with self.semaphore:
-            print(f"      [Sc {scene.scene_number}] Pass 1/4: Core Narrative...")
+            print(f"      [Sc {scene.scene_number}] Core Narrative...")
             core_prompt = get_core_prompt(
                 scene.script_text, scene.scene_number, scene.set_name,
                 scene.day_night, scene.int_ext, active_p1, is_conservative, allow_implied
