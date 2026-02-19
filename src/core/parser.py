@@ -24,7 +24,7 @@ class ScriptParser:
 
     def __init__(self):
         # Patterns to identify the start of a scene (Sluglines)
-        self.slug_regex = r'^\s*(?:\d+\s+)?(?:INT\.|EXT\.|I/E\.|INT/EXT\.)'
+        self.slug_regex = r'^\s*(?:\d+[a-zA-Z]*\s+)?(?:INT\.|EXT\.|I/E\.|INT/EXT\.|DREAM SEQUENCE|MONTAGE|INSERT)'
         
         # Memory to handle 'CONTINUOUS' or 'LATER' logic inheritance
         self.last_set_name = ""
@@ -99,7 +99,7 @@ class ScriptParser:
         
         This list acts as the foundation for the 4-Pass AI Analysis.
         """
-        pattern = f"(?m)({self.slug_regex})"
+        pattern = re.compile(f"({self.slug_regex})", re.MULTILINE)
         parts = re.split(pattern, full_text)
         
         scenes = []
@@ -111,6 +111,9 @@ class ScriptParser:
             
             components = self._get_scene_components(header_line)
             scene_body = "\n".join(body.split('\n')[1:]).strip()
+            # If scene_body is empty or just whitespace, skip this iteration
+            if not scene_body:
+                continue
             
             # Page Math
             line_count = len(scene_body.split('\n'))
@@ -134,8 +137,10 @@ class ScriptParser:
 
     def _get_scene_components(self, header: str) -> Dict[str, str]:
         """Surgically extracts INT/EXT, Set, and Time from a slugline."""
-        header = re.sub(r'^\s*(\d+[A-Z]*|[A-Z]+\d+)\b', '', header, flags=re.IGNORECASE).strip()
-        header = re.sub(r'\b(\d+[A-Z]*|[A-Z]+\d+)\s*$', '', header, flags=re.IGNORECASE).strip()
+        #header = re.sub(r'^\s*(\d+[A-Z]*|[A-Z]+\d+)\b', '', header, flags=re.IGNORECASE).strip()
+        #header = re.sub(r'\b(\d+[A-Z]*|[A-Z]+\d+)\s*$', '', header, flags=re.IGNORECASE).strip()
+        header = re.sub(r'^\s*\d+[a-zA-Z]*\s+', '', header, flags=re.IGNORECASE).strip()
+        header = re.sub(r'\s+\d+[a-zA-Z]*$', '', header, flags=re.IGNORECASE).strip()
         
         h_up = header.upper().strip()
         triggers = ["CONTINUOUS", "LATER", "SAME", "FOLLOWING", "MOMENTS"]
@@ -159,7 +164,8 @@ class ScriptParser:
         
         if len(parts) >= 2:
             current_set = parts[0].strip()
-            current_tod = parts[1].strip().upper()
+            raw_tod = parts[1].strip().upper()
+            current_tod = re.sub(r'[\*\d[A-Z]]+$', '', raw_tod).strip()
             
             for pref in standard_prefixes + ["UNDERWATER", "SPACE", "VIRTUAL"]:
                 pattern = re.compile(re.escape(pref) + r'\.?\s*', re.IGNORECASE)
@@ -187,5 +193,5 @@ class ScriptParser:
     def _extract_scene_number(self, header: str) -> str:
         """Returns the scene ID (e.g., '15A')."""
         clean_header = re.sub(r'(?i)SCENE|SC\.?\s*', '', header).strip()
-        match = re.search(r'(\d+[A-Z]*)', clean_header)
+        match = re.search(r'(\d+[a-zA-Z]*)', clean_header)
         return match.group(1) if match else "0"
