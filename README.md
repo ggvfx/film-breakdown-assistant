@@ -28,6 +28,8 @@ The core logic has successfully transitioned from CLI to a PySide6 (Qt) Desktop 
 * **GUI Transition:** Rebuilt the interface in **PySide6** with a dual-tab "Setup vs. Review" architecture.
 * **Process Interruption:** Engineered a safe **Kill Switch** that merges partial results into the master list, enabling "Pause/Resume" functionality.
 * **Async Orchestration:** Integrated `QThread` and `asyncio` to maintain a responsive UI and prevent "Event Loop" collisions during local LLM communication.
+* **Intelligent Resource Management:** Implemented a hardware scanning utility to auto-detect Dedicated GPUs and suggest performance tiers. Added a manual "Re-scan" trigger to allow for real-time resource reassessment.
+* **Dynamic Model Switching:** Integrated a model discovery layer that fetches all locally downloaded Ollama tags, allowing users to hot-swap between different LLMs (e.g., Llama 3.1 8B vs. 3.2 3B) directly within the UI.
 * **Visual Polish:** Implemented a hardware-optimized "Performance Mode" selector and a high-visibility, dark-themed Review Grid with adjustable line weights.
 
 ### Phase 3: Industry Interoperability (Current)
@@ -50,7 +52,7 @@ The tool follows a **"Security-First"** and **"Human-in-the-Loop"** philosophy:
 * **Comprehensive Element Extraction:** Leverages LLM analysis to identify and categorize 15+ production departments, from Cast and Background counts to Props, Vehicles, and VFX requirements.
 * **Automated Risk & Safety Flagging:** Scans for high-priority production concerns, including regulatory labor (minors), stunts, intimacy, weaponry, and high-cost logistics (animals/cranes).
 * **Conservative vs. Inference Modes:** Toggleable extraction logic that distinguishes between explicitly stated script elements and AI-implied production needs (e.g., implying "SFX: Smoke" if "Fire" is mentioned).
-* **Hardware-Optimized Workflows:** Features "Eco" and "Power" processing modes to manage local compute resources, enabling smooth operation on production laptops or high-speed multi-threaded analysis.
+* **Hardware-Aware Adaptive Workflows:** Features an automated System Assessment engine that scans local CPU/RAM and detects NVIDIA GPUs (via CUDA) upon launch. The tool dynamically suggests optimal processing profiles; Eco, Balanced, or Turbo and toggles dedicated GPU Acceleration to offload LLM inference to VRAM for 4x–10x faster scene processing.
 * **Industry Standard Interoperability:** Engineered for direct integration into the production ecosystem with planned **.sex (Scheduling Export)** support for **Movie Magic Scheduling** alongside Excel/CSV output.
 * **Session & State Management:** Includes robust "Save/Load" functionality via local JSON checkpoints, allowing production staff to review, edit, and resume breakdowns without data loss.
 
@@ -60,12 +62,14 @@ The tool utilizes a coordinated Multi-Agent Pipeline that builds a persistent me
 * **Continuity Agent (Memory & Matching)** Utilizes a "Matchmaker" and "Observer" logic. It references a growing Master History of all named characters, unique vehicles, and props to prevent "data drift" and ensure character states (like injuries or wardrobe conditions) persist logically between scenes.
 * **Review Flag Agent (Safety & Risk):** A dedicated inspector that performs an intent-based scan for high-priority concerns including stunts, intimacy, weaponry, and regulatory requirements (minors). It automatically generates AD Alerts with severity ratings (1-3) for direct oversight.
 * **Implicit Element Discovery:** Scans character dialogue for props or requirements mentioned but not explicitly described in scene action lines.
+* **GPU-Accelerated Parallelism:** On systems with dedicated VRAM, the tool utilizes an asynchronous semaphore logic to fire all 4 "Harvester" passes concurrently. By offloading these calculations to GPU cores, the multi-agent reasoning layer can perform complex continuity audits in seconds, making local LLM performance comparable to cloud-based solutions without the privacy risk.
 
 ## 🛠️ Technical Stack
 * **Language:** Python 3.11+
 * **UI:** PySide6 (Qt)
 * **Intelligence:** Ollama (Llama 3.1 8B / Llama 3.2 3B)
 * **Data Handling:** Pydantic, Pandas
+* **Hardware Detection:** psutil, nvidia-smi (Subprocess)
 
 ## 📂 Project Structure
 * `src/core/`: Parsing, logic and data models.

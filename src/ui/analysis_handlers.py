@@ -4,6 +4,7 @@ AI Analysis Coordination Mixin.
 Handles the orchestration of the 4-Pass AI breakdown process, including
 UI-to-Config synchronization, scene range filtering, and thread management.
 """
+import time
 from PySide6.QtCore import QThread
 from src.ui.worker import AnalysisWorker
 
@@ -78,6 +79,9 @@ class AnalysisHandlerMixin:
 
         self.expected_count = len(scenes_to_process)
 
+        self.start_timestamp = time.time() # Capture start time
+        self.log_output.append(f"<b>RUN STARTED:</b> {time.strftime('%H:%M:%S')}")
+
         # 5. Setup Worker & Thread
         self.btn_run.setText("STOP EXTRACTION")
         self.btn_run.setStyleSheet("""
@@ -139,6 +143,23 @@ class AnalysisHandlerMixin:
             
             # Now fill the table with the full, updated master list
             self.populate_table(self.current_scenes)
+
+            end_timestamp = time.time()
+            duration = end_timestamp - self.start_timestamp
+            minutes = int(duration // 60)
+            seconds = int(duration % 60)
+            
+            # Create the summary string
+            hw_type = "GPU Accelerated" if self.config.use_gpu else "CPU Only"
+            summary = (
+                f"<br><b>--- RUN SUMMARY ---</b><br>"
+                f"Scenes Processed: {len(results)}<br>"
+                f"Total Time: {minutes}m {seconds}s<br>"
+                f"Hardware: {self.config.detected_gpu_info} ({hw_type})<br>"
+                f"Performance: {self.config.performance_mode} ({self.config.worker_threads} threads)<br>"
+            )
+        
+            self.log_output.append(summary)
             
             # UI Feedback
             self.tabs.setTabEnabled(1, True)

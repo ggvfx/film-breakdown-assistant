@@ -18,5 +18,5 @@ pandas               # CSV/Excel logic
 openpyxl             # Excel engine
 lxml                 # Advanced XML for Movie Magic (.sex) export
 
-
-psutil
+# --- SYSTEM & HARDWARE ---
+psutil               # CPU/RAM/Hardware assessment for Performance Modes
