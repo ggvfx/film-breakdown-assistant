@@ -7,15 +7,18 @@ Designed to be serializable for GUI state persistence.
 
 from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
+import subprocess
+import psutil
+import logging
+
 from src.core.models import MMS_CATEGORIES
 
 
 # --- PERFORMANCE MAPPING ---
 PERFORMANCE_LEVELS = {
     "Eco": 1,
-    "Power": 4,
-    "Turbo": 6,
-    "Max": 8
+    "Balanced": 2,
+    "Turbo": 4
 }
 
 class ProjectConfig(BaseModel):
@@ -37,8 +40,14 @@ class ProjectConfig(BaseModel):
     extract_implied_elements: bool = False
     
     ## Performance & Concurrency
-    performance_mode: str = "Power" 
-    worker_threads: int = Field(default=4, ge=1, le=8)
+    performance_mode: str = "Balanced" 
+    worker_threads: int = Field(default=4, ge=1, le=4)
+
+    # Hardware Preference
+    use_gpu: bool = True  
+    
+    # Detected Hardware Info (for UI display)
+    detected_gpu_info: str = "Scanning..."
     
     # Movie Magic Setup
     mms_categories: List[str] = Field(default_factory=lambda: list(MMS_CATEGORIES))
@@ -68,6 +77,37 @@ class ProjectConfig(BaseModel):
     
     # GUI State
     auto_save_enabled: bool = True
+
+
+    def assess_system_hardware(self):
+        """
+        Detects CPU and GPU to suggest the best initial settings. 
+        """
+        results = {
+            "level": "Eco", 
+            "use_gpu": False, 
+            "info": "Standard System"
+        }
+        
+        # 1. Check for NVIDIA GPU via nvidia-smi 
+        try:
+            # check_output returns the status; if it fails, it raises an exception 
+            subprocess.check_output(['nvidia-smi'], stderr=subprocess.STDOUT)
+            results["use_gpu"] = True
+            results["level"] = "Turbo" # Suggested for GPU users 
+            results["info"] = "NVIDIA GPU Detected (RTX/GTX)"
+        except (Exception, FileNotFoundError):
+            # 2. Fallback: Check CPU cores for non-GPU systems 
+            cpu_count = psutil.cpu_count(logical=False) or 4
+            if cpu_count >= 6:
+                results["level"] = "Balanced"
+                results["info"] = f"{cpu_count}-Core CPU Detected"
+            else:
+                results["level"] = "Eco"
+                results["info"] = "Mobile/Low-power CPU Detected"
+        
+        self.detected_gpu_info = results["info"]
+        return results
 
     # --- HELPERS ---
     def set_performance_level(self, mode: str):

@@ -123,7 +123,10 @@ class ScriptAnalyzer:
         if not self.is_running:
             return None
 
-        llm_options = {"temperature": self.config.temperature}
+        llm_options = {
+            "temperature": self.config.temperature,
+            "num_gpu": 99 if self.config.use_gpu else 0
+        }
         is_conservative = self.config.conservative_mode
         allow_implied = self.config.extract_implied_elements
 

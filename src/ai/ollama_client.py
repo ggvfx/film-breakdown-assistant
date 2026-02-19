@@ -9,7 +9,7 @@ import ollama
 import json
 import logging
 import re
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 class OllamaClient:
     """
@@ -39,13 +39,15 @@ class OllamaClient:
         """
         if self._client is None:
             self.reset_session()
+
+        llm_options = options or {}
             
         try:
             response = await self._client.generate(
                 model=self.model_name,
                 prompt=prompt,
                 format="json",
-                options=options or {}
+                options=llm_options
             )
             
             raw_content = response.get('response', '')
@@ -77,3 +79,17 @@ class OllamaClient:
     def update_model(self, new_model_name: str):
         """Allows the GUI to change the active model without restarting."""
         self.model_name = new_model_name
+
+    def get_local_models(self) -> List[str]:
+        """Fetches the list of all models currently downloaded in Ollama."""
+        try:
+            response = ollama.list()
+            model_names = []
+            for m in response.get('models', []):
+                name = getattr(m, 'model', None) or m.get('name') or m.get('model')
+                if name:
+                    model_names.append(name)
+            return model_names if model_names else ["llama3.1:8b"]
+        except Exception as e:
+            logging.error(f"Failed to fetch local Ollama models: {e}")
+            return ["llama3.1:8b"]

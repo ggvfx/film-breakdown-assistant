@@ -45,6 +45,8 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         self._build_setup_ui()
         self._build_review_ui()
 
+        self.run_hardware_assessment()
+
     def reset_for_new_project(self):
         """Factory reset for UI when a new script is loaded."""
         self.table.setRowCount(0)      # Wipes the review table
@@ -201,50 +203,51 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         tl = QVBoxLayout()
         tl.setSpacing(12)
 
-        # Row 1: Model Temperature
-        temp_row = QHBoxLayout()
-        temp_label = QLabel("Model Temperature:")
-        temp_label.setToolTip("Controls randomness: 0.0 is deterministic, 1.0 is highly creative.")
-        
-        self.spin_temp = QDoubleSpinBox()
-        self.spin_temp.setRange(0.0, 1.0)
-        self.spin_temp.setSingleStep(0.1)
-        self.spin_temp.setValue(self.config.temperature)
-        self.spin_temp.setFixedWidth(150) # Fixed width for alignment
-        
-        temp_row.addWidget(temp_label)
-        temp_row.addWidget(self.spin_temp)
-        temp_row.addStretch() # Anchors to left
-        tl.addLayout(temp_row)
-
-        # Row 2: Checkboxes (Stacked between Temp and Performance)
-        check_row = QHBoxLayout()
+        # TOP ROW: Mode Toggles
+        mode_row = QHBoxLayout()
         self.chk_cons = QCheckBox("Conservative Mode")
-        self.chk_cons.setToolTip("Prioritizes accuracy; AI will only extract elements explicitly named in text.")
         self.chk_cons.setChecked(self.config.conservative_mode)
-
         self.chk_implied = QCheckBox("Extract Implied")
-        self.chk_implied.setToolTip("Allows AI to extract logical but unnamed elements (e.g., 'Table' in a 'Dining Room').")
         self.chk_implied.setChecked(self.config.extract_implied_elements)
         
-        check_row.addWidget(self.chk_cons)
-        check_row.addSpacing(20)
-        check_row.addWidget(self.chk_implied)
-        check_row.addStretch()
-        tl.addLayout(check_row)
+        mode_row.addWidget(self.chk_cons)
+        mode_row.addSpacing(20)
+        mode_row.addWidget(self.chk_implied)
+        mode_row.addStretch()
+        tl.addLayout(mode_row)
 
-        # Row 3: Performance Level
+        # MIDDLE ROW: AI Model Selection
+        model_row = QHBoxLayout()
+        model_row.addWidget(QLabel("AI Model:"))
+        self.combo_model = QComboBox()
+        self.combo_model.setMinimumWidth(250)
+        # Link manual selection to the config update
+        self.combo_model.currentTextChanged.connect(self.analyzer.client.update_model)
+        
+        model_row.addWidget(self.combo_model)
+        model_row.addStretch()
+        tl.addLayout(model_row)
+
+        # BOTTOM ROW: Performance, GPU, and Re-scan
         perf_row = QHBoxLayout()
-        perf_label = QLabel("Performance Level:")
-        perf_label.setToolTip("Determines how many CPU threads are dedicated to the AI processing.")
-        
+        perf_row.addWidget(QLabel("Performance:"))
         self.combo_perf = QComboBox()
-        self.combo_perf.addItems(["Eco", "Power", "Turbo", "Max"])
+        self.combo_perf.addItems(["Eco", "Balanced", "Turbo"])
         self.combo_perf.setCurrentText(self.config.performance_mode)
-        self.combo_perf.setFixedWidth(150) # Fixed width to align with spinbox row
+        self.combo_perf.currentTextChanged.connect(self.config.set_performance_level)
         
-        perf_row.addWidget(perf_label)
+        self.chk_gpu = QCheckBox("GPU Acceleration (RTX)")
+        self.chk_gpu.setChecked(self.config.use_gpu)
+        self.chk_gpu.toggled.connect(self.set_gpu_preference)
+
+        self.btn_rescan = QPushButton("Re-scan Hardware")
+        self.btn_rescan.clicked.connect(self.run_hardware_assessment)
+
         perf_row.addWidget(self.combo_perf)
+        perf_row.addSpacing(15)
+        perf_row.addWidget(self.chk_gpu)
+        perf_row.addSpacing(15)
+        perf_row.addWidget(self.btn_rescan)
         perf_row.addStretch()
         tl.addLayout(perf_row)
         
@@ -277,6 +280,37 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         # 2. Insert a spacer ABOVE the log (at the index before the log)
         # We don't save it to a variable, we will find it by its position.
         #layout.addStretch(1)
+
+    def run_hardware_assessment(self):
+        """Runs the config assessment and updates the UI. """
+        stats = self.config.assess_system_hardware()
+        
+        # Update Internal Config State 
+        self.config.use_gpu = stats["use_gpu"]
+        self.chk_gpu.setChecked(stats["use_gpu"])
+        
+        # Sync UI Dropdown 
+        index = self.combo_perf.findText(stats["level"])
+        if index >= 0:
+            self.combo_perf.setCurrentIndex(index)
+            self.config.set_performance_level(stats["level"])
+
+        # Populate Model List
+        models = self.analyzer.client.get_local_models()
+        self.combo_model.clear()
+        self.combo_model.addItems(models)
+        
+        # Set the current model from config if it exists in the list
+        current_model = self.config.ollama_model
+        index = self.combo_model.findText(current_model)
+        if index >= 0:
+            self.combo_model.setCurrentIndex(index)
+        
+        self.log_output.append(f"<b>AI ENGINE:</b> Loaded {len(models)} local models.")
+
+        # Output to Log (Make sure to check 'Expand Log' to see this) 
+        self.log_output.append(f"<b>SYSTEM ASSESSMENT:</b> {stats['info']}")
+        self.log_output.append(f"<b>AUTO-SELECTED:</b> {stats['level']} mode.")
 
     def toggle_log_expansion(self, visible):
         """Grows the window down. Items stay at the top due to AlignTop."""
@@ -378,19 +412,13 @@ class MainWindow(QMainWindow, TableManagerMixin, FileHandlerMixin, AnalysisHandl
         bot.addWidget(export_box)
         layout.addLayout(bot)
 
-    
+    def set_gpu_preference(self, enabled):
+        """Manually overrides the GPU setting."""
+        self.config.use_gpu = enabled
+        status = "ENABLED" if enabled else "DISABLED"
+        self.log_output.append(f"USER: GPU Acceleration {status}.")
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-            
+    def refresh_model_list(self):
+        """Fetches models from Ollama and populates the dropdown."""
+        self.combo_model.clear()
+        self.combo_model.addItems(["llama3.1:8b", "llama3.2:3b"])
