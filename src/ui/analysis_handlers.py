@@ -41,7 +41,7 @@ class AnalysisHandlerMixin:
         self.config.set_performance_level(self.combo_perf.currentText())
         self.config.use_continuity_agent = self.chk_cont.isChecked()
         self.config.use_flag_agent = self.chk_flag.isChecked()
-        self.config.temperature = self.spin_temp.value()
+        #self.config.temperature = self.spin_temp.value()
         self.config.conservative_mode = self.chk_cons.isChecked()
         self.config.extract_implied_elements = self.chk_implied.isChecked()
         
