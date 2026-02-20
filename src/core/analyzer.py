@@ -134,7 +134,7 @@ class ScriptAnalyzer:
         async def run_ai_call(prompt_func, active_cats, label):
             # Each individual pass checks the semaphore bowl for a token
             async with self.semaphore:
-                print(f"      [Sc {scene.scene_number}] Pass {label}...")
+                print(f"      [Sc {scene.scene_number}] {label}...")
                 prompt = prompt_func(
                     scene_text=scene.description if label != "Core Narrative" else scene.script_text,
                     scene_num=scene.scene_number,

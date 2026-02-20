@@ -2,7 +2,7 @@
 
 **Film Breakdown Assistant** is an intelligent production-scheduling utility designed to eliminate the labor-intensive "grunt work" of manual script analysis. By leveraging Local LLMs, the tool provides a security-first environment for sensitive IP, extracting critical production variables; department elements, stunts, intimacy, and safety requirements—directly into industry-standard formats.
 
-![Film Breakdown Assistant UI](assets/FilmBreakdownAsst_UI_2.png)
+![Film Breakdown Assistant UI](assets/FilmBreakdownAsst_UI_4.png)
 
 ## Project Status
 🚦 **Project Status:** Beta (GUI Integration)
@@ -30,7 +30,7 @@ The core logic has successfully transitioned from CLI to a PySide6 (Qt) Desktop 
 * **Async Orchestration:** Integrated `QThread` and `asyncio` to maintain a responsive UI and prevent "Event Loop" collisions during local LLM communication.
 * **Intelligent Resource Management:** Implemented a hardware scanning utility to auto-detect Dedicated GPUs and suggest performance tiers. Added a manual "Re-scan" trigger to allow for real-time resource reassessment.
 * **Dynamic Model Switching:** Integrated a model discovery layer that fetches all locally downloaded Ollama tags, allowing users to hot-swap between different LLMs (e.g., Llama 3.1 8B vs. 3.2 3B) directly within the UI.
-* **Visual Polish:** Implemented a hardware-optimized "Performance Mode" selector and a high-visibility, dark-themed Review Grid with adjustable line weights.
+* **Visual Polish:** Implemented a hardware-optimized "Performance Mode" selector and a high-visibility, dark-themed Review Grid with adjusted line weights.
 
 ### Phase 3: Industry Interoperability (Current)
 * **Movie Magic Integration:** Development of the `.sex` XML exporter to eliminate manual data entry in MMS.
