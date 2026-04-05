@@ -2,6 +2,8 @@
 
 **Film Breakdown Assistant** is an intelligent production-scheduling utility designed to eliminate the labor-intensive "grunt work" of manual script analysis. By leveraging Local LLMs, the tool provides a security-first environment for sensitive IP, extracting critical production variables; department elements, stunts, intimacy, and safety requirements—directly into industry-standard formats.
 
+[Film Breakdown Assistant demo video](https://vimeo.com/1166543229)
+
 ![Film Breakdown Assistant UI](assets/FilmBreakdownAsst_UI_4.png)
 
 ## Project Status
